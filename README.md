@@ -1,8 +1,6 @@
 # Integration Test in Tutor
 
-A Github action to test your plugin in Tutor (Open edX distribution).
-
-![](https://img.shields.io/badge/current_version-v0.0.0-blue)
+A Github action to test your Django Apps in Tutor (Open edX distribution).
 
 ## Example usage
 
@@ -13,14 +11,17 @@ on: [pull_request]
 jobs:
   integration-test:
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
-        tutor_version: ["<18.0.0"]
+        tutor_version: ["<17.0.0", "==17.0.3", "<18.0.0"]
+
     steps:
       - uses: actions/checkout@v4
         with:
           path: eox-hooks
-      - uses: eduNEXT/integration-test-in-tutor@mfmz/github-action
+
+      - uses: eduNEXT/integration-test-in-tutor
         with:
           tutor_version: ${{ matrix.tutor_version }}
           app_name: "eox-hooks"
