@@ -14,6 +14,9 @@ inputs:
 runs:
   using: 'composite'
   steps:
+  - name: Check out the repository
+    uses: actions/checkout@v2
+
   - name: Prepare Tutor and Launch
     run: |
       pip install "tutor$INPUT_TUTOR_VERSION"
@@ -27,10 +30,32 @@ runs:
       INPUT_APP: ${{ inputs.app_name }}
       INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
 
-  - name: Run integration tests in lms
-    if: ${{ inputs.shell_file_to_run }}
+  - name: Install eox-core and eox-tenant in LMS
     run: |
-      TUTOR_ROOT="$(pwd)" tutor local run lms bash $INPUT_SHELL_FILE
+      # Install eox-core and eox-tenant in the LMS container
+      TUTOR_ROOT="$(pwd)" tutor local run lms pip install /openedx/${{ inputs.app_name }}/eox-core
+      TUTOR_ROOT="$(pwd)" tutor local run lms pip install /openedx/${{ inputs.app_name }}/eox-tenant
     shell: bash
-    env:
-      INPUT_SHELL_FILE: /openedx/${{ inputs.app_name }}/${{ inputs.shell_file_to_run }}
+
+  - name: Check if LMS is running
+    run: |
+      # Set a timeout for 5 minutes (300 seconds)
+      TIMEOUT=300
+      INTERVAL=10
+      ELAPSED=0
+
+      echo "Waiting for LMS to be available at http://local.edly.io:8000..."
+
+      # Check if LMS is accessible on http://local.edly.io:8000
+      until curl --silent --head --fail http://local.edly.io:8000; do
+        if [ $ELAPSED -ge $TIMEOUT ]; then
+          echo "LMS is not available after $TIMEOUT seconds, exiting..."
+          exit 1
+        fi
+        echo "LMS is not available yet, waiting for $INTERVAL seconds..."
+        sleep $INTERVAL
+        ELAPSED=$((ELAPSED + INTERVAL))
+      done
+
+      echo "LMS is up and running."
+    shell: bash
