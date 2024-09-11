@@ -50,10 +50,10 @@ runs:
       INTERVAL=10
       ELAPSED=0
 
-      echo "Waiting for LMS to be available at http://www.myopenedx.com..."
+      echo "Waiting for LMS to be available at http://www.lms:8000/heartbeat ..."
 
-      # Check if LMS is accessible on http://www.myopenedx.com
-      until curl --silent --head --fail http://www.myopenedx.com:8000/heartbeat; do
+      # Check if LMS is accessible on http://www.lms:8000/heartbeat
+      until curl --silent --head --fail http://www.lms:8000/heartbeat; do
         if [ $ELAPSED -ge $TIMEOUT ]; then
           echo "LMS is not available after $TIMEOUT seconds, exiting..."
           tutor local logs lms
