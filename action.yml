@@ -33,8 +33,8 @@ runs:
   - name: Install eox-core and eox-tenant in LMS
     run: |
       # Install eox-core and eox-tenant in the LMS container
-      TUTOR_ROOT="$(pwd)" tutor local run lms pip install /openedx/${{ inputs.app_name }}/eox-core
-      TUTOR_ROOT="$(pwd)" tutor local run lms pip install /openedx/${{ inputs.app_name }}/eox-tenant
+      TUTOR_ROOT="$(pwd)" tutor local run lms pip install eox-core
+      TUTOR_ROOT="$(pwd)" tutor local run lms pip install eox-tenant
     shell: bash
 
   - name: Check if LMS is running
