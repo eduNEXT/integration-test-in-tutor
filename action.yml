@@ -53,7 +53,7 @@ runs:
       echo "Waiting for LMS to be available at http://www.lms:8000/heartbeat ..."
 
       # Check if LMS is accessible on http://www.lms:8000/heartbeat
-      until curl --silent --head --fail http://www.lms:8000/heartbeat; do
+      until curl --silent --head --fail http://www.0.0.0.0:8000/heartbeat; do
         if [ $ELAPSED -ge $TIMEOUT ]; then
           echo "LMS is not available after $TIMEOUT seconds, exiting..."
           tutor local logs lms
