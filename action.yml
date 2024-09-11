@@ -47,7 +47,7 @@ runs:
       echo "Waiting for LMS to be available at http://local.edly.io:8000..."
 
       # Check if LMS is accessible on http://local.edly.io:8000
-      until curl --silent --head --fail http://local.edly.io:8000; do
+      until curl --silent --head --fail http://local.edly.io:8000/heartbeat; do
         if [ $ELAPSED -ge $TIMEOUT ]; then
           echo "LMS is not available after $TIMEOUT seconds, exiting..."
           exit 1
