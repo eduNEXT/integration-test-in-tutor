@@ -30,6 +30,11 @@ runs:
       INPUT_APP: ${{ inputs.app_name }}
       INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
 
+  - name: Curl Heartbeat
+    run: |
+      curl -s --head http://local.edly.io/hearbeat
+    shell: bash
+
   - name: Run bash script
     if: ${{ inputs.shell_file_to_run }}
     run: |
