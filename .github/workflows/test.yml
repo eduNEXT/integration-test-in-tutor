@@ -56,4 +56,4 @@ jobs:
 
       - name: Check LMS heartbeat endpoint
         run: |
-          curl -f http://$LMS_HOST:8000/heartbeat
+          curl -f http://$LMS_HOST:80/heartbeat
