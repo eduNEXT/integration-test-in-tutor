@@ -40,6 +40,7 @@ runs:
 
   - name: Run integration tests
     run: |
+      cd $(pwd)/$INPUT_APP
       make install-dev-dependencies
       pytest "$INPUT_APP/$TEST_PATH"
     shell: bash
