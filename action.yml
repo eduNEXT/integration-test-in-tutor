@@ -42,7 +42,7 @@ runs:
     run: |
       cd $(pwd)/$INPUT_APP
       make install-dev-dependencies
-      pytest "$(pwd)/$INPUT_APP/$TEST_PATH"
+      pytest $TEST_PATH"
     shell: bash
     env:
       INPUT_APP: ${{ inputs.app_name }}
