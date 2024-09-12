@@ -34,16 +34,16 @@ jobs:
 
       - name: Start Tutor
         run: |
-          tutor dev launch -I
+          tutor local launch -I
 
       - name: Install additional LMS requirements
         run: |
-          tutor dev run lms pip install eox-core eox-tenant
-          tutor dev restart lms
+          tutor local run lms pip install eox-core eox-tenant
+          tutor local restart lms
 
       - name: Wait for services to be up
         run: |
-          sleep 60  # Adjust the sleep time as necessary for services to be fully ready
+          sleep 600  # Adjust the sleep time as necessary for services to be fully ready
 
       - name: Get LMS_HOST value
         id: lms_host
@@ -52,7 +52,7 @@ jobs:
 
       - name: Check LMS logs
         run: |
-          tutor local logs lms --tail=100  # Retrieve the last 100 lines of LMS logs
+          tutor local logs lms --tail=200  # Retrieve the last 100 lines of LMS logs
 
       - name: Check LMS heartbeat endpoint
         run: |
