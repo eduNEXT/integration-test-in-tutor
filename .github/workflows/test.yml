@@ -14,6 +14,18 @@ jobs:
 #        with:
 #          python-version: '3.11'
 
+      - name: Check open ports
+        run: |
+          sudo netstat -tuln  # Or use ss if netstat is not available
+
+      - name: Check for web proxy services
+        run: |
+          ps aux | grep -E 'nginx|apache|caddy'
+
+      - name: Check for proxy environment variables
+        run: |
+          env | grep -i proxy
+
       - name: Install Tutor
         run: |
           python3 -m pip install --upgrade pip
@@ -41,9 +53,9 @@ jobs:
           tutor local run lms pip install eox-core eox-tenant
           tutor local restart lms
 
-      - name: Wait for services to be up
-        run: |
-          sleep 600  # Adjust the sleep time as necessary for services to be fully ready
+#      - name: Wait for services to be up
+#        run: |
+#          sleep 600  # Adjust the sleep time as necessary for services to be fully ready
 
       - name: Get LMS_HOST value
         id: lms_host
