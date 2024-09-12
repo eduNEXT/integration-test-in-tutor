@@ -1,0 +1,45 @@
+name: Tutor Setup with Plugin Verification
+
+on: [push, pull_request]
+
+jobs:
+  setup-tutor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'
+
+      - name: Install Tutor
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install tutor
+
+      - name: Add extra LMS requirements
+        run: |
+          # Create a custom Tutor configuration to add extra pip requirements for the LMS
+          tutor config save --set LMS_EXTRA_PIP_REQUIREMENTS="eox-core\neox-tenant"
+
+      - name: Rebuild the LMS image to include the extra requirements
+        run: |
+          tutor images build openedx
+
+      - name: Start Tutor
+        run: |
+          tutor local launch -I
+
+      - name: Wait for services to be up
+        run: |
+          sleep 60  # Adjust the sleep time as necessary for services to be fully ready
+
+      - name: Check LMS logs
+        run: |
+          tutor local logs lms --tail=100  # Retrieve the last 100 lines of LMS logs
+
+      - name: Check LMS heartbeat endpoint
+        run: |
+          curl -f http://localhost:8000/heartbeat
