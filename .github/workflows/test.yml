@@ -9,10 +9,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.11'
+#      - name: Set up Python 3.11
+#        uses: actions/setup-python@v2
+#        with:
+#          python-version: '3.11'
 
       - name: Install Tutor
         run: |
@@ -22,7 +22,7 @@ jobs:
       - name: Add extra LMS requirements
         run: |
           # Create a custom Tutor configuration to add extra pip requirements for the LMS
-          tutor config save --set LMS_EXTRA_PIP_REQUIREMENTS="eox-core\neox-tenant"
+          tutor config save --set OPENEDX_EXTRA_PIP_REQUIREMENTS="eox-core\neox-tenant"
 
       - name: Rebuild the LMS image to include the extra requirements
         run: |
