@@ -10,6 +10,9 @@ inputs:
   shell_file_to_run:
     description: 'The path of the shell file to run the integration tests.'
     required: false
+  tests_path:
+    description: 'The path of the integration tests.'
+    required: false
 
 runs:
   using: 'composite'
@@ -27,10 +30,20 @@ runs:
       INPUT_APP: ${{ inputs.app_name }}
       INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
 
-  - name: Run integration tests in lms
+  - name: Run bash script
     if: ${{ inputs.shell_file_to_run }}
     run: |
+      pip install pytest
       TUTOR_ROOT="$(pwd)" tutor local run lms bash $INPUT_SHELL_FILE
     shell: bash
     env:
       INPUT_SHELL_FILE: /openedx/${{ inputs.app_name }}/${{ inputs.shell_file_to_run }}
+
+  - name: Run integration tests
+    run: |
+      pip install pytest
+      pytest "$INPUT_APP/$TEST_PATH"
+    shell: bash
+    env:
+      INPUT_APP: ${{ inputs.app_name }}
+      TEST_PATH: ${{ inputs.tests_path }}
