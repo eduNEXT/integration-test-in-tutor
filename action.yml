@@ -17,6 +17,9 @@ runs:
   - name: Prepare Tutor and Launch
     run: |
       if [ "$INPUT_TUTOR_VERSION" = "nightly" ]; then
+          pip install virtualenv
+          virtualenv venv
+          source venv/bin/activate
           git clone --branch=nightly --depth=1 https://github.com/overhangio/tutor.git
           chmod 777 tutor -R
           pip install -e "./tutor[full]"
