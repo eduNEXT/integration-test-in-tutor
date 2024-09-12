@@ -28,6 +28,10 @@ jobs:
 #        run: |
 #          tutor images build openedx
 
+      - name: Configure LMS to be externally accessible
+        run: |
+          tutor config save --set LMS_HOST=0.0.0.0
+
       - name: Start Tutor
         run: |
           tutor local launch -I
