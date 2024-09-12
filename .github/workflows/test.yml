@@ -34,12 +34,12 @@ jobs:
 
       - name: Start Tutor
         run: |
-          tutor dev launch -I
+          tutor dev launch -d
 
       - name: Install additional LMS requirements
         run: |
-          tutor local run lms pip install eox-core eox-tenant
-          tutor local restart lms
+          tutor dev run lms pip install eox-core eox-tenant
+          tutor dev restart lms
 
       - name: Wait for services to be up
         run: |
