@@ -19,18 +19,23 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install tutor
 
-      - name: Add extra LMS requirements
-        run: |
-          # Create a custom Tutor configuration to add extra pip requirements for the LMS
-          tutor config save --set OPENEDX_EXTRA_PIP_REQUIREMENTS="eox-core\neox-tenant"
+#      - name: Add extra LMS requirements
+#        run: |
+#          # Create a custom Tutor configuration to add extra pip requirements for the LMS
+#          tutor config save --set OPENEDX_EXTRA_PIP_REQUIREMENTS="eox-core\neox-tenant"
 
-      - name: Rebuild the LMS image to include the extra requirements
-        run: |
-          tutor images build openedx
+#      - name: Rebuild the LMS image to include the extra requirements
+#        run: |
+#          tutor images build openedx
 
       - name: Start Tutor
         run: |
           tutor local launch -I
+
+      - name: Install additional LMS requirements
+        run: |
+          tutor local run lms pip install eox-core eox-tenant
+          tutor local restart lms
 
       - name: Wait for services to be up
         run: |
