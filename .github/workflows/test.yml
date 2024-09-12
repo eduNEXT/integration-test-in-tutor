@@ -34,7 +34,7 @@ jobs:
 
       - name: Start Tutor
         run: |
-          tutor dev launch -d
+          tutor dev launch -I -d
 
       - name: Install additional LMS requirements
         run: |
