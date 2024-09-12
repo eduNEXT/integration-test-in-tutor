@@ -29,7 +29,7 @@ runs:
 
   - name: Check LMS heartbeat endpoint
     run: |
-      curl -f http://www.myopenedx.com:8000/heartbeat
+      curl -f http://localhost:8000/heartbeat
     shell: bash
 
   - name: Run integration tests in lms
