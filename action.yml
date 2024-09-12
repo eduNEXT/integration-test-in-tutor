@@ -1,68 +1,45 @@
-name: Integration Test in Tutor
-description: 'A Github action to test your plugin in Tutor (Open edX distribution)'
-inputs:
-  app_name:
-    description: 'Application name to test. E.g., eox-tenant.'
-    required: true
-  tutor_version:
-    description: 'The tutor version matrix to use.'
-    required: true
-  shell_file_to_run:
-    description: 'The path of the shell file to run the integration tests.'
-    required: false
+name: Tutor Setup with Plugin Verification
 
-runs:
-  using: 'composite'
-  steps:
-  - name: Check out the repository
-    uses: actions/checkout@v2
+on: [push, pull_request]
 
-  - name: Prepare Tutor and Launch
-    run: |
-      pip install "tutor$INPUT_TUTOR_VERSION"
-      tutor --version
-      tutor config save
-      chmod 777 . -R
-      tutor local launch -I
-    shell: bash
-    env:
-      INPUT_APP: ${{ inputs.app_name }}
-      INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
+jobs:
+  setup-tutor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-  - name: Install eox-core and eox-tenant in LMS
-    run: |
-      # Install eox-core and eox-tenant in the LMS container
-      tutor local run lms pip install eox-core
-      tutor local run lms pip install eox-tenant
-    shell: bash
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'
 
-  - name: Fetch Tutor Logs for Debugging
-    run: |
-      echo "Fetching Tutor logs for debugging..."
-      tutor local logs lms  # Fetch LMS logs
-      tutor local logs cms  # Fetch CMS logs
-    shell: bash
+      - name: Install Tutor
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install tutor
 
-  - name: Check if LMS is running
-    run: |
-      # Set a timeout for 5 minutes (300 seconds) in case LMS takes longer to start
-      TIMEOUT=300
-      INTERVAL=10
-      ELAPSED=0
+      - name: Add extra LMS requirements
+        run: |
+          # Create a custom Tutor configuration to add extra pip requirements for the LMS
+          tutor config save --set LMS_EXTRA_PIP_REQUIREMENTS="eox-core\neox-tenant"
 
-      echo "Waiting for LMS to be available at http://lms:8000/heartbeat ..."
+      - name: Rebuild the LMS image to include the extra requirements
+        run: |
+          tutor images build openedx
 
-      # Check if LMS is accessible on http://lms:8000/heartbeat
-      until curl --silent --head --fail http://lms:8000/heartbeat; do
-        if [ $ELAPSED -ge $TIMEOUT ]; then
-          echo "LMS is not available after $TIMEOUT seconds, exiting..."
-          tutor local logs lms
-          exit 1
-        fi
-        echo "LMS is not available yet, waiting for $INTERVAL seconds..."
-        sleep $INTERVAL
-        ELAPSED=$((ELAPSED + INTERVAL))
-      done
+      - name: Start Tutor
+        run: |
+          tutor local launch -I
 
-      echo "LMS is up and running."
-    shell: bash
+      - name: Wait for services to be up
+        run: |
+          sleep 60  # Adjust the sleep time as necessary for services to be fully ready
+
+      - name: Check LMS logs
+        run: |
+          tutor local logs lms --tail=100  # Retrieve the last 100 lines of LMS logs
+
+      - name: Check LMS heartbeat endpoint
+        run: |
+          curl -f http://localhost:8000/heartbeat
