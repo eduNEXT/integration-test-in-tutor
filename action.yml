@@ -40,7 +40,7 @@ runs:
 
   - name: Run integration tests
     run: |
-      pip install pytest
+      make install-dev-dependencies
       pytest "$INPUT_APP/$TEST_PATH"
     shell: bash
     env:
