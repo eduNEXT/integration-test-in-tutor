@@ -1,6 +1,6 @@
 name: Tutor Setup with Plugin Verification
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   setup-tutor:
