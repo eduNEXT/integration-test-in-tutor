@@ -30,6 +30,7 @@ runs:
   - name: Check LMS heartbeat endpoint
     run: |
       curl -f http://lms:8000/heartbeat
+    shell: bash
 
   - name: Run integration tests in lms
     if: ${{ inputs.shell_file_to_run }}
