@@ -33,7 +33,6 @@ runs:
   - name: Run bash script
     if: ${{ inputs.shell_file_to_run }}
     run: |
-      pip install pytest
       TUTOR_ROOT="$(pwd)" tutor local run lms bash $INPUT_SHELL_FILE
     shell: bash
     env:
