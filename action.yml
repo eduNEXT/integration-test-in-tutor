@@ -32,8 +32,7 @@ runs:
     - name: Prepare Tutor
       run: |
         pip install "tutor$INPUT_TUTOR_VERSION"
-        which tutor
-        tutor --version
+        export TUTOR_PLUGINS_ROOT=$(pwd)/plugins/ && export TUTOR_ROOT=$(pwd)
         tutor config save # Create the config.yml
         chmod 777 . -R
       shell: bash
@@ -42,6 +41,7 @@ runs:
 
     - name: Launch Tutor
       run: |
+        export TUTOR_PLUGINS_ROOT=$(pwd)/plugins/ && export TUTOR_ROOT=$(pwd)
         tutor config save --set LMS_HOST=local.edly.io
         tutor config save --set CMS_HOST=studio.local.edly.io
         tutor mounts add lms,cms,lms-worker,cms-worker:$INPUT_APP_NAME:/openedx/$INPUT_APP_NAME
@@ -53,8 +53,10 @@ runs:
 
     - name: Install Plugin
       run: |
+        export TUTOR_PLUGINS_ROOT=$(pwd)/plugins/ && export TUTOR_ROOT=$(pwd)
         tutor local exec lms pip install -e /openedx/$INPUT_APP_NAME
         tutor local exec cms pip install -e /openedx/$INPUT_APP_NAME
+        tutor local restart
       shell: bash
       env:
         INPUT_APP_NAME: ${{ inputs.app_name }}
