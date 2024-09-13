@@ -53,7 +53,8 @@ runs:
 
     - name: Install Plugin
       run: |
-        tutor local exec pip install -e /openedx/$INPUT_APP_NAME
+        tutor local exec lms pip install -e /openedx/$INPUT_APP_NAME
+        tutor local exec cms pip install -e /openedx/$INPUT_APP_NAME
       shell: bash
       env:
         INPUT_APP_NAME: ${{ inputs.app_name }}
