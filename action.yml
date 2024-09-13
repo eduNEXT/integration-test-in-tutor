@@ -32,8 +32,8 @@ runs:
 
   - name: Curl Heartbeat
     run: |
-      curl -s --head http://local.edly.io/heartbeat
-      curl -s --head http://local.edly.io/eox-core/eox-info
+      curl -s http://local.edly.io/heartbeat
+      curl -s http://local.edly.io/eox-core/eox-info
     shell: bash
 
   - name: Run bash script
