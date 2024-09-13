@@ -54,15 +54,15 @@ jobs:
       - name: Check Open edX eox-core eox-info
         run: |
           until curl -sSf http://local.edly.io/eox-core/eox-info; do
-            echo "Waiting for LMS to be ready..."
+            echo "Waiting for EOX CORE to be ready..."
             sleep 5
           done
-          echo "LMS is up and running!"
+          echo "EOX CORE is up and running!"
 
       - name: Check eox-tenant eox-info
         run: |
           until curl -sSf http://local.edly.io/eox-tenant/eox-info; do
-            echo "Waiting for LMS to be ready..."
+            echo "Waiting for EOX TENANT to be ready..."
             sleep 5
           done
-          echo "LMS is up and running!"
+          echo "EOX TENANT is up and running!"
