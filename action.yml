@@ -43,13 +43,16 @@ runs:
     - name: Launch Tutor
       run: |
         tutor local launch --non-interactive
+        tutor config save --set LMS_HOST=local.edly.io
+        tutor config save --set CMS_HOST=studio.local.edly.io
+        tutor local restart
         echo "Tutor launched"
       shell: bash
 
     - name: Curl Heartbeat
       run: |
         echo "Curling the heartbeat"
-        curl -s http://local.edly.io/heartbeat
+        curl http://local.edly.io/heartbeat
       shell: bash
 
     # - name: Run bash script
