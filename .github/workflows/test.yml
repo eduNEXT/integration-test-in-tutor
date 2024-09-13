@@ -3,59 +3,59 @@ name: Tutor Open edX CI
 on: [push]
 
 jobs:
-setup-tutor:
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+  setup-tutor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y python3 python3-pip curl
-        pip3 install tutor
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip curl
+          pip3 install tutor
 
-    - name: Configure Tutor plugin
-      run: |
-        tutor plugins create patches <<EOF
-        name: patches
-        patches:
-          caddyfile: |
-            {$default_site_port} {
-            @favicon_matcher {
-                path_regexp ^/favicon.ico$
-            }
-            rewrite @favicon_matcher /theming/asset/images/favicon.ico
+      - name: Configure Tutor plugin
+        run: |
+          tutor plugins create patches <<EOF
+          name: patches
+          patches:
+            caddyfile: |
+              {$default_site_port} {
+              @favicon_matcher {
+                  path_regexp ^/favicon.ico$
+              }
+              rewrite @favicon_matcher /theming/asset/images/favicon.ico
 
-            {{ patch("caddyfile-mfe-by-path") }}
+              {{ patch("caddyfile-mfe-by-path") }}
 
-            # Limit profile image upload size
-            request_body /api/profile_images/*/*/upload {
-                max_size 1MB
-            }
-            request_body {
-                max_size 4MB
-            }
-            import proxy "lms:8000"
-            }
+              # Limit profile image upload size
+              request_body /api/profile_images/*/*/upload {
+                  max_size 1MB
+              }
+              request_body {
+                  max_size 4MB
+              }
+              import proxy "lms:8000"
+              }
 
-          openedx-cms-production-settings: |
-            ALLOWED_HOSTS = ["*"]
+            openedx-cms-production-settings: |
+              ALLOWED_HOSTS = ["*"]
 
-          openedx-lms-production-settings: |
-            ALLOWED_HOSTS = ["*"]
-        EOF
-        tutor plugins enable patches
+            openedx-lms-production-settings: |
+              ALLOWED_HOSTS = ["*"]
+          EOF
+          tutor plugins enable patches
 
-    - name: Launch Tutor
-      run: |
-        tutor config save
-        tutor local launch
+      - name: Launch Tutor
+        run: |
+          tutor config save
+          tutor local launch
 
-    - name: Check Open edX LMS heartbeat
-      run: |
-        until curl -sSf http://localhost:8000/heartbeat; do
-          echo "Waiting for LMS to be ready..."
-          sleep 5
-        done
-        echo "LMS is up and running!"
+      - name: Check Open edX LMS heartbeat
+        run: |
+          until curl -sSf http://localhost:8000/heartbeat; do
+            echo "Waiting for LMS to be ready..."
+            sleep 5
+          done
+          echo "LMS is up and running!"
