@@ -65,6 +65,14 @@ runs:
         curl http://local.edly.io/heartbeat
       shell: bash
 
+    - name: Curl eox-info
+      run: |
+        echo "Curling the eox-info"
+        curl http://local.edly.io/$INPUT_APP_NAME/eox-info
+      shell: bash
+      env:
+        INPUT_APP_NAME: ${{ inputs.app_name }}
+
     # - name: Run Bash Script
     #   if: ${{ inputs.shell_file_to_run }}
     #   run: |
