@@ -36,9 +36,32 @@ jobs:
           tutor config save
           tutor local launch -I
 
+      - name: Install eox-core and eox-tenant in LMS
+        run: |
+          # Install eox-core and eox-tenant in the LMS container
+          tutor local run lms pip install eox-core
+          tutor local run lms pip install eox-tenant
+        shell: bash
+
       - name: Check Open edX LMS heartbeat
         run: |
           until curl -sSf http://local.edly.io/heartbeat; do
+            echo "Waiting for LMS to be ready..."
+            sleep 5
+          done
+          echo "LMS is up and running!"
+
+      - name: Check Open edX eox-core eox-info
+        run: |
+          until curl -sSf http://local.edly.io/eox-core/eox-info; do
+            echo "Waiting for LMS to be ready..."
+            sleep 5
+          done
+          echo "LMS is up and running!"
+
+      - name: Check eox-tenant eox-info
+        run: |
+          until curl -sSf http://local.edly.io/eox-tenant/eox-info; do
             echo "Waiting for LMS to be ready..."
             sleep 5
           done
