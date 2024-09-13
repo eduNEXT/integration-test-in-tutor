@@ -1,9 +1,6 @@
 name: Tutor Open edX CI
 
-on:
-push:  # This will trigger the workflow on push to any branch
-  branches:
-    - '**'
+on: [push]
 
 jobs:
 setup-tutor:
