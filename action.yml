@@ -24,6 +24,7 @@ runs:
 
     - name: Print current directory and files
       run: |
+        echo "Current directory"
         pwd
         ls -la
       shell: bash
@@ -31,8 +32,6 @@ runs:
     - name: Prepare Tutor
       run: |
         pip install "tutor$INPUT_TUTOR_VERSION"
-        # echo "TUTOR_PLUGINS_ROOT=$(pwd)/plugins/" >> "$GITHUB_ENV"
-        # echo "TUTOR_ROOT=$(pwd)" >> "$GITHUB_ENV"
         which tutor
         tutor --version
         chmod 777 . -R
@@ -44,10 +43,12 @@ runs:
     - name: Launch Tutor
       run: |
         tutor local launch --non-interactive
+        echo "Tutor launched"
       shell: bash
 
     - name: Curl Heartbeat
       run: |
+        echo "Curling the heartbeat"
         curl -s http://local.edly.io/heartbeat
       shell: bash
 
