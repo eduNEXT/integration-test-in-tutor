@@ -48,7 +48,7 @@ jobs:
       - name: Launch Tutor
         run: |
           tutor config save
-          tutor local launch
+          tutor local launch -I
 
       - name: Check Open edX LMS heartbeat
         run: |
