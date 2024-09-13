@@ -38,7 +38,7 @@ jobs:
 
       - name: Check Open edX LMS heartbeat
         run: |
-          until curl -sSf http://www.myopenedx.com/heartbeat; do
+          until curl -sSf http://local.edly.io/heartbeat; do
             echo "Waiting for LMS to be ready..."
             sleep 5
           done
