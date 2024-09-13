@@ -44,7 +44,7 @@ runs:
       run: |
         tutor config save --set LMS_HOST=local.edly.io
         tutor config save --set CMS_HOST=studio.local.edly.io
-        tutor mounts add $INPUT_APP_NAME
+        tutor mounts add lms,cms,lms-worker,cms-worker:$INPUT_APP_NAME:/openedx/$INPUT_APP_NAME
         tutor local launch --non-interactive
         echo "Tutor launched"
       shell: bash
