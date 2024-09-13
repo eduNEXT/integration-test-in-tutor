@@ -21,20 +21,6 @@ jobs:
           echo 'Patching Caddyfile...'
           echo "
           {$default_site_port} {
-              @favicon_matcher {
-                  path_regexp ^/favicon.ico$
-              }
-              rewrite @favicon_matcher /theming/asset/images/favicon.ico
-
-              {{ patch('caddyfile-mfe-by-path') }}
-
-              # Limit profile image upload size
-              request_body /api/profile_images/*/*/upload {
-                  max_size 1MB
-              }
-              request_body {
-                  max_size 4MB
-              }
               import proxy 'lms:8000'
           }
           " > $(tutor config printroot)/env/apps/caddy/Caddyfile
@@ -52,7 +38,7 @@ jobs:
 
       - name: Check Open edX LMS heartbeat
         run: |
-          until curl -sSf http://localhost:8000/heartbeat; do
+          until curl -sSf http://www.myopenedx.com/heartbeat; do
             echo "Waiting for LMS to be ready..."
             sleep 5
           done
