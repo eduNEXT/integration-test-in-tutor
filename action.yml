@@ -27,6 +27,14 @@ runs:
       INPUT_APP: ${{ inputs.app_name }}
       INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
 
+    - name: Check Open edX LMS heartbeat
+      run: |
+        until curl -sSf http://local.edly.io/heartbeat; do
+          echo "Waiting for LMS to be ready..."
+          sleep 5
+        done
+        echo "LMS is up and running!"
+
   - name: Run integration tests in lms
     if: ${{ inputs.shell_file_to_run }}
     run: |
