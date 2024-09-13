@@ -20,11 +20,11 @@ runs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: "3.11"
 
-    - name: Print current directory and files
+    - name: Print Current Directory and Files
       run: |
-        echo "Current directory"
+        echo "Current directory and files"
         pwd
         ls -la
       shell: bash
@@ -34,20 +34,29 @@ runs:
         pip install "tutor$INPUT_TUTOR_VERSION"
         which tutor
         tutor --version
+        tutor config save # Create the config.yml
         chmod 777 . -R
       shell: bash
       env:
-        INPUT_APP: ${{ inputs.app_name }}
         INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
 
     - name: Launch Tutor
       run: |
-        tutor local launch --non-interactive
         tutor config save --set LMS_HOST=local.edly.io
         tutor config save --set CMS_HOST=studio.local.edly.io
-        tutor local restart
+        tutor mounts add $INPUT_APP_NAME
+        tutor local launch --non-interactive
         echo "Tutor launched"
       shell: bash
+      env:
+        INPUT_APP_NAME: ${{ inputs.app_name }}
+
+    - name: Install Plugin
+      run: |
+        tutor local exec pip install -e /openedx/$INPUT_APP_NAME
+      shell: bash
+      env:
+        INPUT_APP_NAME: ${{ inputs.app_name }}
 
     - name: Curl Heartbeat
       run: |
@@ -55,20 +64,20 @@ runs:
         curl http://local.edly.io/heartbeat
       shell: bash
 
-    # - name: Run bash script
+    # - name: Run Bash Script
     #   if: ${{ inputs.shell_file_to_run }}
     #   run: |
-    #     TUTOR_ROOT="$(pwd)" tutor local run lms bash $INPUT_SHELL_FILE
+    #     tutor local run lms bash $INPUT_SHELL_FILE
     #   shell: bash
     #   env:
     #     INPUT_SHELL_FILE: /openedx/${{ inputs.app_name }}/${{ inputs.shell_file_to_run }}
 
     # - name: Run integration tests
     #   run: |
-    #     cd $(pwd)/$INPUT_APP
+    #     cd $(pwd)/$INPUT_APP_NAME
     #     make install-dev-dependencies
     #     pytest $TEST_PATH
     #   shell: bash
     #   env:
-    #     INPUT_APP: ${{ inputs.app_name }}
+    #     INPUT_APP_NAME: ${{ inputs.app_name }}
     #     TEST_PATH: ${{ inputs.tests_path }}
