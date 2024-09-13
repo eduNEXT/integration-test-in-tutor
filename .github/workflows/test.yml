@@ -15,22 +15,6 @@ jobs:
           sudo apt-get install -y python3 python3-pip curl
           pip3 install tutor
 
-      - name: Configure Tutor plugin
-        run: |
-          tutor config save
-          echo 'Patching Caddyfile...'
-          echo "
-          {$default_site_port} {
-              import proxy 'lms:8000'
-          }
-          " > $(tutor config printroot)/env/apps/caddy/Caddyfile
-
-          echo 'Patching CMS production settings...'
-          echo "ALLOWED_HOSTS = ['*']" > $(tutor config printroot)/env/apps/openedx/settings/cms/production.py
-
-          echo 'Patching LMS production settings...'
-          echo "ALLOWED_HOSTS = ['*']" > $(tutor config printroot)/env/apps/openedx/settings/lms/production.py
-
       - name: Launch Tutor
         run: |
           tutor config save
