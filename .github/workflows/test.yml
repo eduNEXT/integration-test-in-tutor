@@ -1,71 +1,64 @@
-name: Tutor Setup with Plugin Verification
+name: Tutor Open edX CI
 
-on: [push]
+on:
+push:  # This will trigger the workflow on push to any branch
+  branches:
+    - '**'
 
 jobs:
-  setup-tutor:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+setup-tutor:
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-#      - name: Set up Python 3.11
-#        uses: actions/setup-python@v2
-#        with:
-#          python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3 python3-pip curl
+        pip3 install tutor
 
-      - name: Check open ports
-        run: |
-          sudo netstat -tuln  # Or use ss if netstat is not available
+    - name: Configure Tutor plugin
+      run: |
+        tutor plugins create patches <<EOF
+        name: patches
+        patches:
+          caddyfile: |
+            {$default_site_port} {
+            @favicon_matcher {
+                path_regexp ^/favicon.ico$
+            }
+            rewrite @favicon_matcher /theming/asset/images/favicon.ico
 
-      - name: Check for web proxy services
-        run: |
-          ps aux | grep -E 'nginx|apache|caddy'
+            {{ patch("caddyfile-mfe-by-path") }}
 
-      - name: Check for proxy environment variables
-        run: |
-          env | grep -i proxy
+            # Limit profile image upload size
+            request_body /api/profile_images/*/*/upload {
+                max_size 1MB
+            }
+            request_body {
+                max_size 4MB
+            }
+            import proxy "lms:8000"
+            }
 
-      - name: Install Tutor
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install tutor
+          openedx-cms-production-settings: |
+            ALLOWED_HOSTS = ["*"]
 
-#      - name: Add extra LMS requirements
-#        run: |
-#          # Create a custom Tutor configuration to add extra pip requirements for the LMS
-#          tutor config save --set OPENEDX_EXTRA_PIP_REQUIREMENTS="eox-core\neox-tenant"
+          openedx-lms-production-settings: |
+            ALLOWED_HOSTS = ["*"]
+        EOF
+        tutor plugins enable patches
 
-#      - name: Rebuild the LMS image to include the extra requirements
-#        run: |
-#          tutor images build openedx
+    - name: Launch Tutor
+      run: |
+        tutor config save
+        tutor local launch
 
-#      - name: Configure LMS to be externally accessible
-#        run: |
-#          tutor config save --set LMS_HOST=0.0.0.0
-
-      - name: Start Tutor
-        run: |
-          tutor local launch -I
-
-      - name: Install additional LMS requirements
-        run: |
-          tutor local run lms pip install eox-core eox-tenant
-          tutor local restart lms
-
-#      - name: Wait for services to be up
-#        run: |
-#          sleep 600  # Adjust the sleep time as necessary for services to be fully ready
-
-      - name: Get LMS_HOST value
-        id: lms_host
-        run: |
-          echo "LMS_HOST=$(tutor config printvalue LMS_HOST)" >> $GITHUB_ENV
-
-      - name: Check LMS logs
-        run: |
-          tutor local logs lms --tail=200  # Retrieve the last 100 lines of LMS logs
-
-      - name: Check LMS heartbeat endpoint
-        run: |
-          curl -f http://LMS:8000/heartbeat
+    - name: Check Open edX LMS heartbeat
+      run: |
+        until curl -sSf http://localhost:8000/heartbeat; do
+          echo "Waiting for LMS to be ready..."
+          sleep 5
+        done
+        echo "LMS is up and running!"
