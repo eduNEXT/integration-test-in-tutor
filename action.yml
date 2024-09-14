@@ -68,11 +68,6 @@ runs:
       env:
         INPUT_APP_NAME: ${{ inputs.app_name }}
 
-    - name: Install Extra Requirements
-      run: |
-        pip install pytest
-      shell: bash
-
     - name: Run Bash Script
       if: ${{ inputs.shell_file_to_run }}
       run: bash $INPUT_SHELL_FILE
