@@ -10,9 +10,6 @@ inputs:
   shell_file_to_run:
     description: "The path of the shell file to run the integration tests."
     required: false
-  tests_path:
-    description: "The path of the integration tests."
-    required: false
 
 runs:
   using: "composite"
@@ -21,13 +18,6 @@ runs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.11"
-
-    - name: Print Current Directory and Files
-      run: |
-        echo "Current directory and files"
-        pwd
-        ls -la
-      shell: bash
 
     - name: Prepare Tutor
       run: |
@@ -39,21 +29,24 @@ runs:
       env:
         INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
 
+    - name: Save Hosts in Environment
+      run: |
+        echo "LMS_HOST=local.edly.io" >> "$GITHUB_ENV"
+        echo "CMS_HOST=studio.local.edly.io" >> "$GITHUB_ENV"
+      shell: bash
+
     - name: Launch Tutor
       run: |
-        export TUTOR_PLUGINS_ROOT=$(pwd)/plugins/ && export TUTOR_ROOT=$(pwd)
-        tutor config save --set LMS_HOST=local.edly.io
-        tutor config save --set CMS_HOST=studio.local.edly.io
+        tutor config save --set LMS_HOST=$LMS_HOST
+        tutor config save --set CMS_HOST=$CMS_HOST
         tutor mounts add lms,cms,lms-worker,cms-worker:$INPUT_APP_NAME:/openedx/$INPUT_APP_NAME
         tutor local launch --non-interactive
-        echo "Tutor launched"
       shell: bash
       env:
         INPUT_APP_NAME: ${{ inputs.app_name }}
 
     - name: Install Plugin
       run: |
-        export TUTOR_PLUGINS_ROOT=$(pwd)/plugins/ && export TUTOR_ROOT=$(pwd)
         tutor local exec lms pip install -e /openedx/$INPUT_APP_NAME
         tutor local exec cms pip install -e /openedx/$INPUT_APP_NAME
         tutor local restart
@@ -64,31 +57,25 @@ runs:
     - name: Curl Heartbeat
       run: |
         echo "Curling the heartbeat"
-        curl http://local.edly.io/heartbeat
+        curl http://$LMS_HOST/heartbeat
       shell: bash
 
     - name: Curl eox-info
       run: |
         echo "Curling the eox-info"
-        curl http://local.edly.io/$INPUT_APP_NAME/eox-info
+        curl http://$LMS_HOST/$INPUT_APP_NAME/eox-info
       shell: bash
       env:
         INPUT_APP_NAME: ${{ inputs.app_name }}
 
-    # - name: Run Bash Script
-    #   if: ${{ inputs.shell_file_to_run }}
-    #   run: |
-    #     tutor local run lms bash $INPUT_SHELL_FILE
-    #   shell: bash
-    #   env:
-    #     INPUT_SHELL_FILE: /openedx/${{ inputs.app_name }}/${{ inputs.shell_file_to_run }}
+    - name: Install Extra Requirements
+      run: |
+        pip install pytest
+      shell: bash
 
-    # - name: Run integration tests
-    #   run: |
-    #     cd $(pwd)/$INPUT_APP_NAME
-    #     make install-dev-dependencies
-    #     pytest $TEST_PATH
-    #   shell: bash
-    #   env:
-    #     INPUT_APP_NAME: ${{ inputs.app_name }}
-    #     TEST_PATH: ${{ inputs.tests_path }}
+    - name: Run Bash Script
+      if: ${{ inputs.shell_file_to_run }}
+      run: bash $INPUT_SHELL_FILE
+      shell: bash
+      env:
+        INPUT_SHELL_FILE: ${{ inputs.app_name }}/${{ inputs.shell_file_to_run }}
