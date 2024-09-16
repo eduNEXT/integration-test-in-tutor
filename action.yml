@@ -70,6 +70,8 @@ runs:
             ALLOWED_HOSTS = ["*"]
             ALLOWED_AUTH_APPLICATIONS = ['cms-sso', 'cms-sso-dev']
         EOF
+        ls -la
+        ls -la plugins
         tutor plugins enable patches
         tutor local restart
       shell: bash
