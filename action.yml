@@ -40,6 +40,40 @@ runs:
       env:
         INPUT_APP_NAME: ${{ inputs.app_name }}
 
+    - name: Configure Caddyfile
+      run: |
+        mkdir -p plugins
+        cat << 'EOF' > plugins/patches.yml
+
+        name: patches
+        patches:
+          caddyfile: |
+            {$default_site_port} {
+              @favicon_matcher {
+                path_regexp ^/favicon.ico$
+              }
+              rewrite @favicon_matcher /theming/asset/images/favicon.ico
+              {{ patch("caddyfile-mfe-by-path") }}
+              # Limit profile image upload size
+              request_body /api/profile_images/*/*/upload {
+                max_size 1MB
+              }
+              request_body {
+                max_size 4MB
+              }
+              import proxy "lms:8000"
+            }
+          openedx-cms-production-settings: |
+            ALLOWED_HOSTS = ["*"]
+            ALLOWED_AUTH_APPLICATIONS = ['cms-sso', 'cms-sso-dev']
+          openedx-lms-production-settings: |
+            ALLOWED_HOSTS = ["*"]
+            ALLOWED_AUTH_APPLICATIONS = ['cms-sso', 'cms-sso-dev']
+        EOF
+        tutor plugins enable patches
+        tutor local restart
+      shell: bash
+
     - name: Install Plugin
       run: |
         tutor local exec lms pip install -e /openedx/$INPUT_APP_NAME
