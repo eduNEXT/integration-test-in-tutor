@@ -13,6 +13,10 @@ inputs:
   fixtures_file:
     description: "Optional path to the plugin's fixtures file to load."
     required: false
+  extra_requirements:
+    description: "Optional requirements to install."
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -77,17 +81,29 @@ runs:
             ALLOWED_AUTH_APPLICATIONS = ['cms-sso', 'cms-sso-dev']
         EOF
         tutor plugins enable patches
-        tutor local restart
       shell: bash
 
     - name: Install Plugin
       run: |
         tutor local exec lms pip install -e /openedx/$INPUT_APP_NAME
         tutor local exec cms pip install -e /openedx/$INPUT_APP_NAME
-        tutor local restart
       shell: bash
       env:
         INPUT_APP_NAME: ${{ inputs.app_name }}
+
+    - name: Install Extra Requirements
+      run: |
+        tutor local exec lms pip install $INPUT_EXTRA_REQUIREMENTS
+        tutor local exec cms pip install $INPUT_EXTRA_REQUIREMENTS
+      shell: bash
+      env:
+        INPUT_EXTRA_REQUIREMENTS: ${{ inputs.extra_requirements }}
+
+    - name: Run Migrations
+      run: |
+        tutor local exec lms python manage.py lms migrate
+        tutor local exec cms python manage.py cms migrate
+      shell: bash
 
     - name: Load Fixtures
       run: |
@@ -96,6 +112,11 @@ runs:
       shell: bash
       env:
         INPUT_FIXTURES_FILE: ${{ inputs.app_name }}/${{ inputs.fixtures_file }}
+
+    - name: Restart Services
+      run: |
+        tutor local restart
+      shell: bash
 
     - name: Curl Heartbeat
       run: |
