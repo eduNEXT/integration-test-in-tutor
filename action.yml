@@ -76,10 +76,11 @@ runs:
         tutor local restart
       shell: bash
 
-    - name: Install Plugin
+    - name: Install Plugin and Load Fixtures
       run: |
         tutor local exec lms pip install -e /openedx/$INPUT_APP_NAME
         tutor local exec cms pip install -e /openedx/$INPUT_APP_NAME
+        tutor local exec lms python manage.py lms loaddata /openedx/$INPUT_APP_NAME/fixtures/*.json
         tutor local restart
       shell: bash
       env:
