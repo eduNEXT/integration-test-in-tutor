@@ -73,7 +73,6 @@ runs:
         ls -la
         ls -la plugins
         which tutor
-        print TUTOR_PLUGINS_ROOT
         tutor plugins list
         tutor plugins enable patches
         tutor local restart
