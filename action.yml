@@ -70,11 +70,7 @@ runs:
             ALLOWED_HOSTS = ["*"]
             ALLOWED_AUTH_APPLICATIONS = ['cms-sso', 'cms-sso-dev']
         EOF
-        ls -la
-        ls -la plugins
-        which tutor
         export TUTOR_PLUGINS_ROOT=$(pwd)/plugins/
-        tutor plugins list
         tutor plugins enable patches
         tutor local restart
       shell: bash
@@ -101,6 +97,12 @@ runs:
       shell: bash
       env:
         INPUT_APP_NAME: ${{ inputs.app_name }}
+
+    - name: Curl Access Token
+      run: |
+        echo "Curling the access token"
+        curl -X POST http://$LMS_HOST/oauth2/access_token -d "client_id=client_id" -d "client_secret=client_secret" -d "grant_type=client_credentials"
+      shell: bash
 
     - name: Run Bash Script
       if: ${{ inputs.shell_file_to_run }}
