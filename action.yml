@@ -22,18 +22,13 @@ runs:
     - name: Prepare Tutor
       run: |
         pip install "tutor$INPUT_TUTOR_VERSION"
-        export TUTOR_PLUGINS_ROOT=$(pwd)/plugins/ && export TUTOR_ROOT=$(pwd)
+        echo "LMS_HOST=local.edly.io" >> "$GITHUB_ENV"
+        echo "CMS_HOST=studio.local.edly.io" >> "$GITHUB_ENV"
         tutor config save # Create the config.yml
         chmod 777 . -R
       shell: bash
       env:
         INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
-
-    - name: Save Hosts in Environment
-      run: |
-        echo "LMS_HOST=local.edly.io" >> "$GITHUB_ENV"
-        echo "CMS_HOST=studio.local.edly.io" >> "$GITHUB_ENV"
-      shell: bash
 
     - name: Launch Tutor
       run: |
