@@ -10,6 +10,9 @@ inputs:
   shell_file_to_run:
     description: "The path of the shell file to run the integration tests."
     required: false
+  fixtures_file:
+    description: "Optional path to the plugin's fixtures file to load."
+    required: false
 
 runs:
   using: "composite"
@@ -38,6 +41,7 @@ runs:
         tutor config save --set CMS_HOST=$CMS_HOST
         tutor mounts add lms,cms,lms-worker,cms-worker:$INPUT_APP_NAME:/openedx/$INPUT_APP_NAME
         tutor local launch --non-interactive
+        tutor mounts list
       shell: bash
       env:
         INPUT_APP_NAME: ${{ inputs.app_name }}
@@ -76,15 +80,22 @@ runs:
         tutor local restart
       shell: bash
 
-    - name: Install Plugin and Load Fixtures
+    - name: Install Plugin
       run: |
         tutor local exec lms pip install -e /openedx/$INPUT_APP_NAME
         tutor local exec cms pip install -e /openedx/$INPUT_APP_NAME
-        tutor local exec lms python manage.py lms loaddata /openedx/$INPUT_APP_NAME/fixtures/*.json
         tutor local restart
       shell: bash
       env:
         INPUT_APP_NAME: ${{ inputs.app_name }}
+
+    - name: Load Fixtures
+      run: |
+        tutor local dc cp $INPUT_FIXTURES_FILE lms:/openedx/$INPUT_FIXTURES_FILE
+        tutor local exec lms python manage.py lms loaddata /openedx/$INPUT_FIXTURES_FILE
+      shell: bash
+      env:
+        INPUT_FIXTURES_FILE: ${{ inputs.app_name }}/${{ inputs.fixtures_file }}
 
     - name: Curl Heartbeat
       run: |
