@@ -14,9 +14,8 @@ inputs:
     description: "Optional path to the plugin's fixtures file to load."
     required: false
   extra_requirements:
-    description: "Optional requirements to install."
+    description: "Optional requirements to install. You can pass multiple requirements separated by space."
     required: false
-    default: ""
 
 runs:
   using: "composite"
@@ -92,6 +91,7 @@ runs:
         INPUT_APP_NAME: ${{ inputs.app_name }}
 
     - name: Install Extra Requirements
+      if: ${{ inputs.extra_requirements }}
       run: |
         tutor local exec lms pip install $INPUT_EXTRA_REQUIREMENTS
         tutor local exec cms pip install $INPUT_EXTRA_REQUIREMENTS
