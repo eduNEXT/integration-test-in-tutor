@@ -41,7 +41,6 @@ runs:
       TUTOR_ROOT="$(pwd)" tutor config save
       TUTOR_ROOT="$(pwd)" tutor mounts add lms,cms,lms-worker,cms-worker:$(pwd)/$INPUT_APP:/openedx/$INPUT_APP
       chmod 777 . -R
-      TUTOR_ROOT="$(pwd)" tutor images build openedx 
       TUTOR_ROOT="$(pwd)" tutor local launch -I
     shell: bash
     env:
