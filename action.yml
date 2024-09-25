@@ -21,12 +21,20 @@ inputs:
   fixtures_file:
     description: "Optional path to the plugin's fixtures file to load."
     required: false
+  openedx_imports_test_file_path:
+    description: "Path to the file that contains the test function for validating Open edX imports. This should be a Python file within your project."
+    required: false
+  openedx_imports_test_function_name:
+    description: "Name of the function in the specified file that executes the import tests for Open edX."
+    required: false
 
 runs:
   using: "composite"
   steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        path: ${{ inputs.app_name }}
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -70,10 +78,20 @@ runs:
         tutor plugins enable patches
       shell: bash
 
-    - name: Install plugin and extra requirements
+    - name: Install plugin as an editable package
+      if: ${{ inputs.fixtures_file }}
       run: |
-        tutor local exec lms pip install ${{ inputs.app_name }} ${{ inputs.openedx_extra_pip_requeriments }}
-        tutor local exec cms pip install ${{ inputs.app_name }} ${{ inputs.openedx_extra_pip_requeriments }}
+        echo "Copying plugin to the LMS folder"
+        #tutor local exec lms mkdir -p /openedx/${{ inputs.app_name }}
+        tutor local dc cp "$GITHUB_WORKSPACE/${{ inputs.app_name }}" lms:/openedx/
+
+        tutor local exec lms pip install -e /openedx/${{ inputs.app_name }}/
+      shell: bash
+
+    - name: Install extra requirements
+      run: |
+        tutor local exec lms pip install ${{ inputs.openedx_extra_pip_requeriments }}
+        tutor local exec cms pip install ${{ inputs.openedx_extra_pip_requeriments }}
       shell: bash
 
     - name: Run migrations
@@ -83,13 +101,43 @@ runs:
         tutor local restart
       shell: bash
 
+    - name: Test Open edX imports in plugin
+      if: ${{ inputs.openedx_imports_test_file_path && inputs.openedx_imports_test_function_name }}
+      run: |
+        echo "Running test function dynamically"
+        tutor local exec --env PYTHONPATH=/openedx/${{ inputs.app_name }} \
+                        --env DJANGO_SETTINGS_MODULE=lms.envs.production \
+                        lms python -c "
+        import os
+        import django
+        import importlib.util
+        django.setup()
+
+        # Path to the file where the test function is located
+        file_path = '/openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }}'
+        function_name = '${{ inputs.openedx_imports_test_function_name }}'
+
+        # Load the module from the file path
+        spec = importlib.util.spec_from_file_location('test_module', file_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        # Get the function dynamically using getattr
+        func = getattr(module, function_name)
+
+        # Execute the function
+        func()
+        "
+      shell: bash
+
     - name: Load inital data for the tests
       if: ${{ inputs.fixtures_file }}
       run: |
         echo "Copying fixtures file to the LMS container"
-        tutor local exec lms mkdir -p /openedx/fixtures
-        tutor local dc cp ${{ inputs.fixtures_file }} lms:/openedx/fixtures/fixture.json
-        tutor local exec lms python manage.py lms loaddata /openedx/fixtures/fixture.json
+        #tutor local exec lms mkdir -p /openedx/fixtures
+        #tutor local dc cp ${{ inputs.fixtures_file }} lms:/openedx/fixtures/fixture.json
+        #tutor local exec lms python manage.py lms loaddata /openedx/fixtures/fixture.json
+        tutor local exec lms python manage.py lms loaddata /openedx/${{ inputs.app_name }}/${{ inputs.fixtures_file }}
       shell: bash
 
     - name: Curl Heartbeat
@@ -114,6 +162,7 @@ runs:
           exit 1
         fi
         source .venv/bin/activate
+        cd ${{ inputs.app_name }}
         chmod +x ./${{ inputs.shell_file_to_run }}
         ./${{ inputs.shell_file_to_run }}
       shell: bash
