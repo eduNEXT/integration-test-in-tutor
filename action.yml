@@ -61,21 +61,7 @@ runs:
     - name: Configure Caddyfile and Open edX settings
       run: |
         mkdir -p plugins
-        cat << 'EOF' > plugins/patches.yml
-
-        name: patches
-        patches:
-          caddyfile: |
-            {$default_site_port} {
-              import proxy "lms:8000"
-            }
-          openedx-cms-production-settings: |
-            ALLOWED_HOSTS = ["*"]
-            ALLOWED_AUTH_APPLICATIONS = ['cms-sso', 'cms-sso-dev']
-          openedx-lms-production-settings: |
-            ALLOWED_HOSTS = ["*"]
-            ALLOWED_AUTH_APPLICATIONS = ['cms-sso', 'cms-sso-dev']
-        EOF
+        cp $GITHUB_ACTION_PATH/patches.yml plugins/
         tutor plugins enable patches
       shell: bash
 
