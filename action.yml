@@ -78,11 +78,23 @@ runs:
         tutor plugins enable patches
       shell: bash
 
+    - name: Add mount for plugin
+      run: |
+        tutor mounts add "lms:$GITHUB_WORKSPACE/${{ inputs.app_name }}:/openedx/${{ inputs.app_name }}"
+        tutor mounts add "cms:$GITHUB_WORKSPACE/${{ inputs.app_name }}:/openedx/${{ inputs.app_name }}"
+      shell: bash
+
+    - name: Restart Tutor services to apply mounts
+      run: |
+        tutor local stop
+        tutor local start -d
+      shell: bash
+
     - name: Install plugin as an editable package
       if: ${{ inputs.fixtures_file }}
       run: |
         echo "Copying plugin to the LMS folder"
-        tutor local dc cp "$GITHUB_WORKSPACE/${{ inputs.app_name }}" lms:/openedx/
+        #tutor local dc cp "$GITHUB_WORKSPACE/${{ inputs.app_name }}" lms:/openedx/
 
         tutor local exec lms pip install -e /openedx/${{ inputs.app_name }}/
       shell: bash
