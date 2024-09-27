@@ -82,7 +82,6 @@ runs:
       if: ${{ inputs.fixtures_file }}
       run: |
         echo "Copying plugin to the LMS folder"
-        #tutor local exec lms mkdir -p /openedx/${{ inputs.app_name }}
         tutor local dc cp "$GITHUB_WORKSPACE/${{ inputs.app_name }}" lms:/openedx/
 
         tutor local exec lms pip install -e /openedx/${{ inputs.app_name }}/
@@ -130,9 +129,6 @@ runs:
       if: ${{ inputs.fixtures_file }}
       run: |
         echo "Copying fixtures file to the LMS container"
-        #tutor local exec lms mkdir -p /openedx/fixtures
-        #tutor local dc cp ${{ inputs.fixtures_file }} lms:/openedx/fixtures/fixture.json
-        #tutor local exec lms python manage.py lms loaddata /openedx/fixtures/fixture.json
         tutor local exec lms python manage.py lms loaddata /openedx/${{ inputs.app_name }}/${{ inputs.fixtures_file }}
       shell: bash
 
@@ -153,10 +149,6 @@ runs:
       run: |
         echo "Creating isolated venv to run the tests"
         python -m venv .venv
-        if [ ! -d ".venv" ]; then
-          echo "Virtual environment creation failed"
-          exit 1
-        fi
         source .venv/bin/activate
         cd ${{ inputs.app_name }}
         chmod +x ./${{ inputs.shell_file_to_run }}
