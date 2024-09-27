@@ -10,7 +10,7 @@ inputs:
   shell_file_to_run:
     description: "The path of the shell file to run the integration tests."
     required: true
-  openedx_extra_pip_requeriments:
+  openedx_extra_pip_requirements:
     description: "Optional extra pip requirements to install in Open edX. E.g: 'package1==1.0 package2>=2.0'"
     required: false
     default: ""
@@ -78,15 +78,14 @@ runs:
       shell: bash
 
     - name: Install plugin as an editable package
-      if: ${{ inputs.fixtures_file }}
       run: |
         tutor local exec lms pip install -e /openedx/${{ inputs.app_name }}/
       shell: bash
 
     - name: Install extra requirements
       run: |
-        tutor local exec lms pip install ${{ inputs.openedx_extra_pip_requeriments }}
-        tutor local exec cms pip install ${{ inputs.openedx_extra_pip_requeriments }}
+        tutor local exec lms pip install ${{ inputs.openedx_extra_pip_requirements }}
+        tutor local exec cms pip install ${{ inputs.openedx_extra_pip_requirements }}
       shell: bash
 
     - name: Run migrations
@@ -124,7 +123,7 @@ runs:
                         --test-function-name '${{ inputs.openedx_imports_test_function_name }}'
       shell: bash
 
-    - name: Load inital data for the tests
+    - name: Load initial data for the tests
       if: ${{ inputs.fixtures_file }}
       run: |
         echo "Copying fixtures file to the LMS container"
