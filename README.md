@@ -113,6 +113,12 @@ This GitHub Action automates the process of setting up a Tutor Open edX environm
 
 9. **Import Demo Course**: Imports the Open edX demo course for testing purposes.
 
+10. **Test Open edX Imports in Plugin** *(Optional)*: Runs a test function to validate Open edX imports in your plugin if `openedx_imports_test_file_path` and `openedx_imports_test_function_name` are provided.
+
+11. **Load Initial Data for the Tests** *(Optional)*: Loads initial data from a fixtures file into the LMS if `fixtures_file` is provided.
+
+12. **Check LMS Heartbeat**: Verifies that the LMS is running by hitting the heartbeat endpoint.
+
 10. **Set `DEMO_COURSE_ID` Environment Variable**:  
     Sets the `DEMO_COURSE_ID` environment variable based on the Tutor version. This variable allows you to refer to the demo course in your tests, which can be helpful when you need to interact with course content during testing.
 
@@ -125,12 +131,6 @@ This GitHub Action automates the process of setting up a Tutor Open edX environm
     DEMO_COURSE_ID = os.environ.get("DEMO_COURSE_ID")
     # Use DEMO_COURSE_ID in your tests
     ```
-
-11. **Test Open edX Imports in Plugin** *(Optional)*: Runs a test function to validate Open edX imports in your plugin if `openedx_imports_test_file_path` and `openedx_imports_test_function_name` are provided.
-
-12. **Load Initial Data for the Tests** *(Optional)*: Loads initial data from a fixtures file into the LMS if `fixtures_file` is provided.
-
-13. **Check LMS Heartbeat**: Verifies that the LMS is running by hitting the heartbeat endpoint.
 
 14. **Run Integration Tests**: Creates a virtual environment and runs your integration tests using the specified shell script.
 

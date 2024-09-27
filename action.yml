@@ -100,21 +100,11 @@ runs:
         tutor local do importdemocourse
       shell: bash
 
-    - name: Set DEMO_COURSE_ID environment variable
-      run: |
-        #TODO: remove this once we stop supporting Tutor <18.0.0
-        if [ "$INPUT_TUTOR_VERSION" = "<18.0.0" ]; then
-          echo "DEMO_COURSE_ID=course-v1:edX+DemoX+Demo_Course" >> $GITHUB_ENV
-        else
-          echo "DEMO_COURSE_ID=course-v1:OpenedX+DemoX+DemoCourse" >> $GITHUB_ENV
-        fi
-      shell: bash
-
     - name: Test Open edX imports in plugin
       if: ${{ inputs.openedx_imports_test_file_path && inputs.openedx_imports_test_function_name }}
       run: |
         cp $GITHUB_ACTION_PATH/run_openedx_imports_test.py $GITHUB_WORKSPACE/${{ inputs.app_name }}/
-        echo "Running test for Open edX imports"
+        echo "Running test for Open edX imports in plugin"
 
         tutor local exec --env PYTHONPATH=/openedx/${{ inputs.app_name }} \
                         --env DJANGO_SETTINGS_MODULE=lms.envs.production \
@@ -142,6 +132,16 @@ runs:
         fi
       shell: bash
 
+    - name: Set DEMO_COURSE_ID environment variable
+      run: |
+        #TODO: remove this once we stop supporting Tutor <18.0.0
+        if [ "${{ inputs.tutor_version }}" = "<18.0.0" ]; then
+          echo "DEMO_COURSE_ID=course-v1:edX+DemoX+Demo_Course" >> $GITHUB_ENV
+        else
+          echo "DEMO_COURSE_ID=course-v1:OpenedX+DemoX+DemoCourse" >> $GITHUB_ENV
+        fi
+      shell: bash
+
     - name: Run integration tests
       if: ${{ inputs.shell_file_to_run }}
       run: |
@@ -153,3 +153,5 @@ runs:
         chmod +x ./${{ inputs.shell_file_to_run }}
         ./${{ inputs.shell_file_to_run }}
       shell: bash
+      env:
+        DEMO_COURSE_ID: ${{ env.DEMO_COURSE_ID }}
