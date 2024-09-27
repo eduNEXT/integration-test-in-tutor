@@ -117,7 +117,7 @@ This GitHub Action automates the process of setting up a Tutor Open edX environm
     Sets the `DEMO_COURSE_ID` environment variable based on the Tutor version. This variable allows you to refer to the demo course in your tests, which can be helpful when you need to interact with course content during testing.
 
     **Usage in Your Tests**:  
-    In your test code, you can access the `DEMO_COURSE_ID` environment variable to get the identifier of the demo course. For example, in Python:
+    In your test code, you can access the `DEMO_COURSE_ID` environment variable to get the identifier of the demo course. For example:
 
     ```python
     import os
@@ -125,8 +125,6 @@ This GitHub Action automates the process of setting up a Tutor Open edX environm
     DEMO_COURSE_ID = os.environ.get("DEMO_COURSE_ID")
     # Use DEMO_COURSE_ID in your tests
     ```
-
-    This ensures that your tests are compatible with different Tutor versions, as the demo course ID may vary between versions.
 
 11. **Test Open edX Imports in Plugin** *(Optional)*: Runs a test function to validate Open edX imports in your plugin if `openedx_imports_test_file_path` and `openedx_imports_test_function_name` are provided.
 
