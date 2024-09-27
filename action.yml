@@ -114,26 +114,14 @@ runs:
     - name: Test Open edX imports in plugin
       if: ${{ inputs.openedx_imports_test_file_path && inputs.openedx_imports_test_function_name }}
       run: |
+        cp $GITHUB_ACTION_PATH/run_openedx_imports_test.py $GITHUB_WORKSPACE/${{ inputs.app_name }}/
         echo "Running test for Open edX imports"
+
         tutor local exec --env PYTHONPATH=/openedx/${{ inputs.app_name }} \
                         --env DJANGO_SETTINGS_MODULE=lms.envs.production \
-                        lms python -c "
-        import os
-        import django
-        import importlib.util
-        django.setup()
-
-        file_path = '/openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }}'
-        function_name = '${{ inputs.openedx_imports_test_function_name }}'
-
-        # Load the module from the file path
-        spec = importlib.util.spec_from_file_location('test_module', file_path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-
-        func = getattr(module, function_name)
-        func()
-        "
+                        lms python /openedx/${{ inputs.app_name }}/run_openedx_imports_test.py \
+                        --test-file-path /openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }} \
+                        --test-function-name '${{ inputs.openedx_imports_test_function_name }}'
       shell: bash
 
     - name: Load inital data for the tests
