@@ -84,9 +84,6 @@ runs:
     - name: Install plugin as an editable package
       if: ${{ inputs.fixtures_file }}
       run: |
-        echo "Copying plugin to the LMS folder"
-        #tutor local dc cp "$GITHUB_WORKSPACE/${{ inputs.app_name }}" lms:/openedx/
-
         tutor local exec lms pip install -e /openedx/${{ inputs.app_name }}/
       shell: bash
 
@@ -101,6 +98,21 @@ runs:
         tutor local exec lms python manage.py lms migrate
         tutor local exec cms python manage.py cms migrate
         tutor local restart
+      shell: bash
+
+    - name: Import Demo course
+      run: |
+        tutor local do importdemocourse
+      shell: bash
+
+    - name: Set DEMO_COURSE_ID environment variable
+      run: |
+        #TODO: remove this once we stop supporting Tutor <18.0.0
+        if [ "$INPUT_TUTOR_VERSION" = "<18.0.0" ]; then
+          echo "DEMO_COURSE_ID=course-v1:edX+DemoX+Demo_Course" >> $GITHUB_ENV
+        else
+          echo "DEMO_COURSE_ID=course-v1:OpenedX+DemoX+DemoCourse" >> $GITHUB_ENV
+        fi
       shell: bash
 
     - name: Test Open edX imports in plugin
@@ -153,6 +165,7 @@ runs:
         echo "Creating isolated venv to run the tests"
         python -m venv .venv
         source .venv/bin/activate
+
         cd ${{ inputs.app_name }}
         chmod +x ./${{ inputs.shell_file_to_run }}
         ./${{ inputs.shell_file_to_run }}
