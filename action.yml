@@ -104,7 +104,7 @@ runs:
     - name: Test Open edX imports in plugin
       if: ${{ inputs.openedx_imports_test_file_path && inputs.openedx_imports_test_function_name }}
       run: |
-        echo "Running test function dynamically"
+        echo "Running test for Open edX imports"
         tutor local exec --env PYTHONPATH=/openedx/${{ inputs.app_name }} \
                         --env DJANGO_SETTINGS_MODULE=lms.envs.production \
                         lms python -c "
@@ -113,7 +113,6 @@ runs:
         import importlib.util
         django.setup()
 
-        # Path to the file where the test function is located
         file_path = '/openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }}'
         function_name = '${{ inputs.openedx_imports_test_function_name }}'
 
@@ -122,10 +121,7 @@ runs:
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
 
-        # Get the function dynamically using getattr
         func = getattr(module, function_name)
-
-        # Execute the function
         func()
         "
       shell: bash
