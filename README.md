@@ -1,6 +1,6 @@
 # Open edX Plugin Integration Tests with Tutor
 
-A GitHub Action to test your Open edX plugin (Django app) in Tutor (Open edX distribution). This action automates the setup of a Tutor environment, installs your plugin, runs migrations, and executes your integration tests in an isolated environment.
+A GitHub Action to test your Open edX plugin (Django app) within Tutor (Open edX distribution). This action automates the setup of a Tutor environment, installs your plugin, runs migrations, and executes your integration tests in an isolated environment.
 
 ## Example Usage
 
@@ -17,20 +17,15 @@ jobs:
         tutor_version: ["<17.0.0", "==17.0.3", "<18.0.0", "nightly"]
 
     steps:
-      - name: Checkout Plugin Code
-        uses: actions/checkout@v4
-        with:
-          path: my-plugin
-
       - name: Run Integration Tests
-        uses: your-github-username/your-action-repo@v1
+        uses: eduNEXT/integration-test-in-tutor@main
         with:
-          app_name: "my-plugin"
+          app_name: "eox-test"
           tutor_version: ${{ matrix.tutor_version }}
           shell_file_to_run: "tests/integration.sh"
           openedx_extra_pip_requirements: "package1==1.0 package2>=2.0"
           fixtures_file: "fixtures/test_data.json"
-          openedx_imports_test_file_path: "tests/import_tests.py"
+          openedx_imports_test_file_path: "tests/integration/import_tests.py"
           openedx_imports_test_function_name: "test_openedx_imports"
 ```
 
@@ -40,7 +35,7 @@ jobs:
 
 **Required**  
 The name of your plugin/application to test. This should match the directory name of your plugin.  
-*Example*: `"my-plugin"`
+*Example*: `"eox-tenant"`
 
 ### `tutor_version`
 
@@ -50,9 +45,6 @@ The version of Tutor to use. You can specify:
 - A specific version number (e.g., `"==17.0.3"`).
 - A comparison operator with a version (e.g., `"<18.0.0"`).
 - The string `"nightly"` to use the latest development version.
-
-**Special Note on Using `"nightly"`**:  
-When you specify `"nightly"` for `tutor_version`, the action will clone the latest code from Tutor's `nightly` branch. This allows you to test your plugin against the most recent changes in Tutor, which might not yet be released in a stable version.
 
 *Examples*:
 
@@ -97,34 +89,44 @@ This GitHub Action automates the process of setting up a Tutor Open edX environm
 
 1. **Checkout Plugin Code**: Checks out your plugin code into a directory specified by `app_name`.
 
-2. **Set Tutor Environment Variables**: Sets necessary environment variables for Tutor.
+2. **Adjust Permissions**: Modifies file permissions to ensure that all files and directories are accessible, preventing permission-related errors during Tutor operations.
 
-3. **Install and Prepare Tutor**: Installs the specified version of Tutor and launches the Open edX platform. If `tutor_version` is set to `"nightly"`, the action clones the latest code from Tutor's `nightly` branch.
+3. **Set Tutor Environment Variables**: Sets necessary environment variables for Tutor.
 
-4. **Configure Caddyfile and Open edX Settings**: Configures the Caddyfile and Open edX settings using `patches.yml`.
+4. **Create Virtual Environments**: Creates isolated Python virtual environments for Tutor and running tests.
 
-5. **Add Mount for Plugin**: Mounts your plugin into the LMS and CMS containers.
+5. **Install and Prepare Tutor**: Installs the specified version of Tutor and launches the Open edX platform.
+   
+   - If `tutor_version` is set to `"nightly"`, clones the Tutor repository from the `nightly` branch.
+   - Saves Tutor configuration.
+   - Launches Tutor in interactive mode.
 
-6. **Install Plugin as an Editable Package**: Installs your plugin in editable mode inside the LMS container.
+6. **Configure Caddyfile and Open edX Settings**: Configures the web server and Open edX settings using Tutor plugins, to enable running integration tests from the plugin with multiple sites.
 
-7. **Install Extra Requirements**: Installs any extra pip requirements specified in `openedx_extra_pip_requirements`.
+7. **Add Mount for Plugin**: Mounts your plugin into the LMS and CMS containers.
 
-8. **Run Migrations**: Runs database migrations for both LMS and CMS and restarts Tutor services.
+8. **Restart Tutor Services**: Stops and starts Tutor services to apply the new mounts.
 
-9. **Import Demo Course**: Imports the Open edX demo course for testing purposes.
+9. **Install Open edX Plugin as an Editable Package**: Installs your plugin in editable mode inside both LMS and CMS containers.
 
-10. **Test Open edX Imports in Plugin** *(Optional)*: Runs a test function to validate Open edX imports in your plugin if `openedx_imports_test_file_path` and `openedx_imports_test_function_name` are provided.
+10. **Install Extra Requirements**: Installs any additional Python packages specified in `openedx_extra_pip_requirements`.
 
-11. **Load Initial Data for the Tests** *(Optional)*: Loads initial data from a fixtures file into the LMS if `fixtures_file` is provided.
+11. **Run Migrations and Restart Services**: Applies database migrations and restarts Tutor services.
 
-12. **Check LMS Heartbeat**: Verifies that the LMS is running by hitting the heartbeat endpoint.
+12. **Import Demo Course**: Imports the Open edX demo course for testing purposes.
 
-10. **Set `DEMO_COURSE_ID` Environment Variable**:  
+13. **Test Open edX Imports in Plugin** *(Optional)*: Runs a test function to validate Open edX imports in your plugin if `openedx_imports_test_file_path` and `openedx_imports_test_function_name` are provided.
+
+14. **Load Initial Data for the Tests** *(Optional)*: Loads initial data from a fixtures file into the LMS if `fixtures_file` is provided.
+
+15. **Check LMS Heartbeat**: Verifies that the LMS is running by hitting the heartbeat endpoint.
+
+16. **Set `DEMO_COURSE_ID` Environment Variable**:  
     Sets the `DEMO_COURSE_ID` environment variable based on the Tutor version. This variable allows you to refer to the demo course in your tests, which can be helpful when you need to interact with course content during testing.
-
+    
     **Usage in Your Tests**:  
     In your test code, you can access the `DEMO_COURSE_ID` environment variable to get the identifier of the demo course. For example:
-
+    
     ```python
     import os
 
@@ -132,12 +134,12 @@ This GitHub Action automates the process of setting up a Tutor Open edX environm
     # Use DEMO_COURSE_ID in your tests
     ```
 
-14. **Run Integration Tests**: Creates a virtual environment and runs your integration tests using the specified shell script.
+17. **Run Integration Tests**: Activates the test virtual environment and runs your integration tests using the specified shell script.
 
 ## Notes
 
 - **Using the `"nightly"` Version of Tutor**:  
-  The `"nightly"` option allows you to test your plugin against the latest development code of Tutor. This is useful for ensuring compatibility with upcoming features or changes. Be aware that the nightly version may be less stable and could introduce breaking changes. When using `"nightly"`, the action clones the Tutor repository from the `nightly` branch and builds the Docker images locally, which may increase the execution time of the workflow.
+  The `"nightly"` option allows you to test your plugin against the latest development code of Tutor. This is useful for ensuring compatibility with upcoming features or changes. Be aware that the nightly version may be less stable and could introduce breaking changes. When using `"nightly"`, the action clones the Tutor repository from the `nightly` branch and uses pre-built Tutor images that are published daily to Docker Hub. These images include the latest changes from the master branch at the time of the build. This approach significantly reduces the execution time and conserves the runner's resources by eliminating the overhead of building images during the workflow.
 
 - **Paths**: Ensure that the paths provided in the inputs are relative to your plugin directory.
 
@@ -147,4 +149,48 @@ This GitHub Action automates the process of setting up a Tutor Open edX environm
 
 - **Dependencies**: If your integration tests require additional dependencies, specify them in `openedx_extra_pip_requirements` or handle them within your `shell_file_to_run`.
 
-- **Permissions**: Ensure your `shell_file_to_run` is executable. The action sets executable permissions before running it.
+- **Maintaining Python Versions**:
+
+  It's crucial to align the Python version in your virtual environments with the versions supported by the specified Tutor versions. Mismatched Python versions can lead to unexpected errors during Tutor operations and plugin integrations.
+
+  If you need to specify a Python version different from the default provided by the runner, you can add a step before invoking the action to set the desired Python version. For example:
+
+  ```yaml
+  - name: Set Up Python
+    uses: actions/setup-python@v4
+    with:
+      python-version: '3.X'  # Specify the required Python version here
+
+  - name: Run Integration Tests
+    uses: eduNEXT/integration-test-in-tutor@mjh/run-integration-tests-outside-container
+    with:
+      ...
+  ```
+
+  If you're testing against multiple Tutor versions that require different Python versions, you can consider expanding your matrix to include Python versions. For example:
+
+  ```yaml
+  strategy:
+    matrix:
+      include:
+        - tutor_version: '<18.0.0'
+          python_version: '3.8'
+        - tutor_version: '<19.0.0'
+          python_version: '3.9'
+        - tutor_version: 'nightly'
+          python_version: '3.10'
+  ```
+
+  Then, adjust the steps to use both `matrix.tutor_version` and `matrix.python_version`.
+
+  ```yaml
+  steps:
+    - name: Set Up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python_version }}  # Utilize matrix.python_version
+        ...
+  ```
+
+## Contributing
+Contributions are welcome! Please open an issue or submit a pull request for any enhancements or bug fixes.
