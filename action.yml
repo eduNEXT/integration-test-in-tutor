@@ -121,6 +121,9 @@ runs:
 
     - name: Test Open edX imports in plugin
       if: ${{ inputs.openedx_imports_test_file_path && inputs.openedx_imports_test_function_name }}
+      env:
+        SCRIPT: /openedx/${{ inputs.app_name }}/run_openedx_imports_test.py
+        OPENEDX_IMPORTS_TEST_FILE_PATH: /openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }}
       run: |
         source .tutor_venv/bin/activate
 
@@ -129,8 +132,8 @@ runs:
 
         tutor local exec --env PYTHONPATH=/openedx/${{ inputs.app_name }} \
                         --env DJANGO_SETTINGS_MODULE=lms.envs.production \
-                        lms python /openedx/${{ inputs.app_name }}/run_openedx_imports_test.py \
-                        --test-file-path /openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }} \
+                        lms python $SCRIPT \
+                        --test-file-path $OPENEDX_IMPORTS_TEST_FILE_PATH \
                         --test-function-name '${{ inputs.openedx_imports_test_function_name }}'
 
     - name: Load initial data for the tests
