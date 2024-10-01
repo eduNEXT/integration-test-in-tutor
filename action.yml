@@ -140,8 +140,7 @@ runs:
         cp $GITHUB_ACTION_PATH/run_openedx_imports_test.py $GITHUB_WORKSPACE/${{ inputs.app_name }}/
         echo "Running test for Open edX imports in plugin"
 
-        tutor local exec --env PYTHONPATH=/openedx/${{ inputs.app_name }} \
-                        --env DJANGO_SETTINGS_MODULE=lms.envs.production \
+        tutor local exec --env DJANGO_SETTINGS_MODULE=lms.envs.production \
                         lms python $SCRIPT \
                         --test-file-path $OPENEDX_IMPORTS_TEST_FILE_PATH \
                         --test-function-name '${{ inputs.openedx_imports_test_function_name }}'
