@@ -35,16 +35,16 @@ jobs:
 
 **Required**  
 The name of your plugin/application to test. This should match the directory name of your plugin.  
-*Example*: `"eox-tenant"`
+* *Example*: `"eox-tenant"`
 
 ### `tutor_version`
 
 **Required**  
 The version of Tutor where you want to run the integration tests. You can specify:
 
-- A specific version number (e.g., `"==18.0.3"`).
-- A comparison operator with a version (e.g., `"<18.0.0"`).
-- The string `"nightly"` to use the latest development version.
+* A specific version number (e.g., `"==18.0.3"`).
+* A comparison operator with a version (e.g., `"<18.0.0"`).
+* The string `"nightly"` to use the latest development version.
 
 > [!IMPORTANT]
 > This action is officially supported and tested with Tutor versions corresponding to the current and immediate previous Open edX releases, as well as the nightly build. Using other Tutor versions is not guaranteed to be supported.
@@ -53,33 +53,33 @@ The version of Tutor where you want to run the integration tests. You can specif
 
 **Optional**  
 The path to the shell script that runs your integration tests. This path is relative to your plugin directory. 
-*Default*: `"scripts/execute_integration_tests.sh"`
-*Example*: `"tests/integration.sh"`
+* *Default*: `"scripts/execute_integration_tests.sh"`
+* *Example*: `"tests/integration.sh"`
 
 ### `openedx_extra_pip_requirements`
 
 **Optional**  
 Extra pip requirements to install in Open edX. These are additional Python packages your plugin depends on. Provide them as a space-separated string.  
-*Default*: `""` (empty string)  
-*Example*: `"package1==1.0 package2>=2.0"`
+* *Default*: `""` (empty string)  
+* *Example*: `"package1==1.0 package2>=2.0"`
 
 ### `fixtures_file`
 
 **Optional**  
 The path to the fixtures file of your plugin to load initial data for the tests. This path is relative to your plugin directory.  
-*Example*: `"fixtures/test_data.json"`
+* *Example*: `"fixtures/test_data.json"`
 
 ### `openedx_imports_test_file_path`
 
 **Optional**  
 The path to the Python file in your plugin that contains the test function for validating Open edX imports. This path is relative to your plugin directory.  
-*Example*: `"tests/import_tests.py"`
+* *Example*: `"tests/import_tests.py"`
 
 ### `openedx_imports_test_function_name`
 
 **Optional**  
 The name of the function in the specified file that executes the import tests for Open edX.  
-*Example*: `"test_openedx_imports"`
+* *Example*: `"test_openedx_imports"`
 
 ## Overview
 
