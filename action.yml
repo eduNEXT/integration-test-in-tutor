@@ -27,6 +27,9 @@ inputs:
 
 runs:
   using: "composite"
+  defaults:
+    run:
+      shell: bash
   steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -36,7 +39,6 @@ runs:
     - name: Adjust permissions to execute Tutor commands
       run: |
         chmod 777 . -R
-      shell: bash
 
     - name: Set Tutor environment variables
       run: |
@@ -44,7 +46,6 @@ runs:
         echo "CMS_HOST=studio.local.edly.io" >> "$GITHUB_ENV"
         echo "TUTOR_ROOT=$(pwd)" >> "$GITHUB_ENV"
         echo "TUTOR_PLUGINS_ROOT=$(pwd)/plugins/" >> "$GITHUB_ENV"
-      shell: bash
 
     - name: Create virtualenvs
       run: |
@@ -52,7 +53,6 @@ runs:
         python -m venv .tutor_venv
         echo "Creating isolated venv to run the integration tests"
         python -m venv .tests_venv
-      shell: bash
 
     - name: Install and prepare Tutor
       run: |
@@ -67,7 +67,6 @@ runs:
 
         tutor config save --set LMS_HOST=$LMS_HOST --set CMS_HOST=$CMS_HOST
         tutor local launch -I
-      shell: bash
       env:
         INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
 
@@ -78,7 +77,6 @@ runs:
         mkdir -p plugins
         cp $GITHUB_ACTION_PATH/patches.yml plugins/
         tutor plugins enable patches
-      shell: bash
 
     - name: Add mount for Open edX plugin
       run: |
@@ -86,14 +84,12 @@ runs:
 
         tutor mounts add "lms:$GITHUB_WORKSPACE/${{ inputs.app_name }}:/openedx/${{ inputs.app_name }}"
         tutor mounts add "cms:$GITHUB_WORKSPACE/${{ inputs.app_name }}:/openedx/${{ inputs.app_name }}"
-      shell: bash
 
     - name: Recreate containers to apply mounts
       run: |
         source .tutor_venv/bin/activate
 
         tutor local start -d lms cms
-      shell: bash
 
     - name: Install Open edX plugin as an editable package
       run: |
@@ -101,7 +97,6 @@ runs:
 
         tutor local exec lms pip install -e /openedx/${{ inputs.app_name }}/
         tutor local exec cms pip install -e /openedx/${{ inputs.app_name }}/
-      shell: bash
 
     - name: Install extra requirements
       run: |
@@ -109,7 +104,6 @@ runs:
 
         tutor local exec lms pip install ${{ inputs.openedx_extra_pip_requirements }}
         tutor local exec cms pip install ${{ inputs.openedx_extra_pip_requirements }}
-      shell: bash
 
     - name: Run migrations and restart services
       run: |
@@ -118,14 +112,12 @@ runs:
         tutor local exec lms python manage.py lms migrate
         tutor local exec cms python manage.py cms migrate
         tutor local restart lms cms
-      shell: bash
 
     - name: Import Demo course
       run: |
         source .tutor_venv/bin/activate
 
         tutor local do importdemocourse
-      shell: bash
 
     - name: Test Open edX imports in plugin
       if: ${{ inputs.openedx_imports_test_file_path && inputs.openedx_imports_test_function_name }}
@@ -140,7 +132,6 @@ runs:
                         lms python /openedx/${{ inputs.app_name }}/run_openedx_imports_test.py \
                         --test-file-path /openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }} \
                         --test-function-name '${{ inputs.openedx_imports_test_function_name }}'
-      shell: bash
 
     - name: Load initial data for the tests
       if: ${{ inputs.fixtures_file }}
@@ -149,7 +140,6 @@ runs:
 
         echo "Copying fixtures file to the LMS container"
         tutor local exec lms python manage.py lms loaddata /openedx/${{ inputs.app_name }}/${{ inputs.fixtures_file }}
-      shell: bash
 
     - name: Curl Heartbeat
       run: |
@@ -161,7 +151,6 @@ runs:
         else
           echo "Heartbeat endpoint returned status code 200"
         fi
-      shell: bash
 
     - name: Set DEMO_COURSE_ID environment variable
       run: |
@@ -171,7 +160,6 @@ runs:
         else
           echo "DEMO_COURSE_ID=course-v1:OpenedX+DemoX+DemoCourse" >> $GITHUB_ENV
         fi
-      shell: bash
 
     - name: Run integration tests
       if: ${{ inputs.shell_file_to_run }}
@@ -181,7 +169,6 @@ runs:
         cd ${{ inputs.app_name }}
         chmod +x ./${{ inputs.shell_file_to_run }}
         ./${{ inputs.shell_file_to_run }}
-      shell: bash
       env:
         DEMO_COURSE_ID: ${{ env.DEMO_COURSE_ID }}
         LMS_HOST: ${{ env.LMS_HOST }}
