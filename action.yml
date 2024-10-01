@@ -40,10 +40,13 @@ runs:
 
     - name: Set Tutor environment variables
       run: |
-        echo "LMS_HOST=local.edly.io" >> "$GITHUB_ENV"
-        echo "CMS_HOST=studio.local.edly.io" >> "$GITHUB_ENV"
-        echo "TUTOR_ROOT=$(pwd)" >> "$GITHUB_ENV"
-        echo "TUTOR_PLUGINS_ROOT=$(pwd)/plugins/" >> "$GITHUB_ENV"
+        {
+          LMS_HOST=local.edly.io
+          CMS_HOST=studio.local.edly.io
+          TUTOR_ROOT=$(pwd)
+          TUTOR_PLUGINS_ROOT=$(pwd)/plugins/
+          echo EOF
+        } >> "$GITHUB_ENV"
       shell: bash
 
     - name: Create virtualenvs
