@@ -87,11 +87,10 @@ runs:
         tutor mounts add "cms:$GITHUB_WORKSPACE/${{ inputs.app_name }}:/openedx/${{ inputs.app_name }}"
       shell: bash
 
-    - name: Restart Tutor services to apply mounts
+    - name: Recreate containers to apply mounts
       run: |
         source .tutor_venv/bin/activate
 
-        tutor local stop lms cms
         tutor local start -d lms cms
       shell: bash
 
