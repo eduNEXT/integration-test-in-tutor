@@ -46,7 +46,7 @@ The version of Tutor where you want to run the integration tests. You can specif
 - A comparison operator with a version (e.g., `"<18.0.0"`).
 - The string `"nightly"` to use the latest development version.
 
-> **Important:**  
+> [!IMPORTANT]
 > This action is officially supported and tested with Tutor versions corresponding to the current and immediate previous Open edX releases, as well as the nightly build. Using other Tutor versions is not guaranteed to be supported.
 
 ### `shell_file_to_run`
