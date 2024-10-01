@@ -168,8 +168,6 @@ runs:
       if: ${{ inputs.shell_file_to_run }}
       env:
         DEMO_COURSE_ID: ${{ env.DEMO_COURSE_ID }}
-        LMS_HOST: ${{ env.LMS_HOST }}
-        CMS_HOST: ${{ env.CMS_HOST }}
       run: |
         source .tests_venv/bin/activate
 
