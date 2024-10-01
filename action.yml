@@ -119,7 +119,7 @@ runs:
 
         tutor local exec lms python manage.py lms migrate
         tutor local exec cms python manage.py cms migrate
-        tutor local restart lms cms
+        tutor local restart
       shell: bash
 
     - name: Import Demo course
