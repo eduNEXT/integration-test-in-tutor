@@ -55,6 +55,8 @@ runs:
         python -m venv .tests_venv
 
     - name: Install and prepare Tutor
+      env:
+        INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
       run: |
         source .tutor_venv/bin/activate
 
@@ -67,8 +69,6 @@ runs:
 
         tutor config save --set LMS_HOST=$LMS_HOST --set CMS_HOST=$CMS_HOST
         tutor local launch -I
-      env:
-        INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
 
     - name: Configure Caddyfile and Open edX settings
       run: |
@@ -163,13 +163,13 @@ runs:
 
     - name: Run integration tests
       if: ${{ inputs.shell_file_to_run }}
+      env:
+        DEMO_COURSE_ID: ${{ env.DEMO_COURSE_ID }}
+        LMS_HOST: ${{ env.LMS_HOST }}
+        CMS_HOST: ${{ env.CMS_HOST }}
       run: |
         source .tests_venv/bin/activate
 
         cd ${{ inputs.app_name }}
         chmod +x ./${{ inputs.shell_file_to_run }}
         ./${{ inputs.shell_file_to_run }}
-      env:
-        DEMO_COURSE_ID: ${{ env.DEMO_COURSE_ID }}
-        LMS_HOST: ${{ env.LMS_HOST }}
-        CMS_HOST: ${{ env.CMS_HOST }}
