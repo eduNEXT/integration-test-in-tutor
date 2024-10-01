@@ -10,6 +10,7 @@ inputs:
   shell_file_to_run:
     description: "The path of the shell file to run the integration tests."
     required: true
+    default: "scripts/execute_integration_tests.sh"
   openedx_extra_pip_requirements:
     description: "Optional extra pip requirements to install in Open edX. E.g: 'package1==1.0 package2>=2.0'"
     required: false
@@ -116,7 +117,7 @@ runs:
 
         tutor local exec lms python manage.py lms migrate
         tutor local exec cms python manage.py cms migrate
-        tutor local restart
+        tutor local restart lms cms
       shell: bash
 
     - name: Import Demo course
