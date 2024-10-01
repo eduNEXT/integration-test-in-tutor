@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        tutor_version: ["<17.0.0", "==17.0.3", "<18.0.0", "nightly"]
+        tutor_version: ["<18.0.0", "==18.0.3", "<19.0.0", "nightly"]
 
     steps:
       - name: Run Integration Tests
@@ -40,22 +40,20 @@ The name of your plugin/application to test. This should match the directory nam
 ### `tutor_version`
 
 **Required**  
-The version of Tutor to use. You can specify:
+The version of Tutor where you want to run the integration tests. You can specify:
 
-- A specific version number (e.g., `"==17.0.3"`).
+- A specific version number (e.g., `"==18.0.3"`).
 - A comparison operator with a version (e.g., `"<18.0.0"`).
 - The string `"nightly"` to use the latest development version.
 
-*Examples*:
-
-- `"==17.0.3"`
-- `"<18.0.0"`
-- `"nightly"`
+> **Important:**  
+> This action is officially supported and tested with Tutor versions corresponding to the current and immediate previous Open edX releases, as well as the nightly build. Using other Tutor versions is not guaranteed to be supported.
 
 ### `shell_file_to_run`
 
-**Required**  
-The path to the shell script that runs your integration tests. This path is relative to your plugin directory.  
+**Optional**  
+The path to the shell script that runs your integration tests. This path is relative to your plugin directory. 
+*Default*: `"scripts/execute_integration_tests.sh"`
 *Example*: `"tests/integration.sh"`
 
 ### `openedx_extra_pip_requirements`
@@ -93,7 +91,7 @@ This GitHub Action automates the process of setting up a Tutor Open edX environm
 
 3. **Set Tutor Environment Variables**: Sets necessary environment variables for Tutor.
 
-4. **Create Virtual Environments**: Creates isolated Python virtual environments for Tutor and running tests.
+4. **Create Virtual Environments**: Creates isolated Python virtual environments for installing Tutor and for running the integration tests.
 
 5. **Install and Prepare Tutor**: Installs the specified version of Tutor and launches the Open edX platform.
    
