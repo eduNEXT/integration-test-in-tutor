@@ -81,7 +81,7 @@ The path to the Python file in your plugin that contains the test function for v
 The name of the function in the specified file that executes the import tests for Open edX.  
 *Example*: `"test_openedx_imports"`
 
-## Description
+## Overview
 
 This GitHub Action automates the process of setting up a Tutor Open edX environment to test your plugin. It performs the following steps:
 
