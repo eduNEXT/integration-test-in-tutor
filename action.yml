@@ -21,9 +21,6 @@ inputs:
   openedx_imports_test_file_path:
     description: "Path to the file that contains the test function for validating Open edX imports. This should be a Python file within your project."
     required: false
-  openedx_imports_test_function_name:
-    description: "Name of the function in the specified file that executes the import tests for Open edX."
-    required: false
 
 runs:
   using: "composite"
@@ -131,19 +128,12 @@ runs:
 
     - name: Test Open edX imports in plugin
       if: ${{ inputs.openedx_imports_test_file_path && inputs.openedx_imports_test_function_name }}
-      env:
-        SCRIPT: /openedx/${{ inputs.app_name }}/run_openedx_imports_test.py
-        OPENEDX_IMPORTS_TEST_FILE_PATH: /openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }}
       run: |
         source .tutor_venv/bin/activate
 
-        cp $GITHUB_ACTION_PATH/run_openedx_imports_test.py $GITHUB_WORKSPACE/${{ inputs.app_name }}/
-        echo "Running test for Open edX imports in plugin"
-
-        tutor local exec --env DJANGO_SETTINGS_MODULE=lms.envs.production \
-                        lms python $SCRIPT \
-                        --test-file-path $OPENEDX_IMPORTS_TEST_FILE_PATH \
-                        --test-function-name '${{ inputs.openedx_imports_test_function_name }}'
+        echo "Running test for Open edX imports in plugin with pytest"
+        tutor local exec lms bash -c "pip install pytest pytest-django"
+        tutor local exec lms bash -c "pytest -s --ds=lms.envs.tutor.test /openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }}"
       shell: bash
 
     - name: Load initial data for the tests
