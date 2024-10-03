@@ -1,0 +1,12 @@
+name: patches
+patches:
+  caddyfile: |
+    {$default_site_port} {
+      import proxy "lms:8000"
+    }
+  openedx-cms-production-settings: |
+    ALLOWED_HOSTS = ["*"]
+    ALLOWED_AUTH_APPLICATIONS = ['cms-sso', 'cms-sso-dev']
+  openedx-lms-production-settings: |
+    ALLOWED_HOSTS = ["*"]
+    ALLOWED_AUTH_APPLICATIONS = ['cms-sso', 'cms-sso-dev']

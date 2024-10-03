@@ -1,60 +1,179 @@
-name: Integration Test in Tutor
-description: 'A Github action to test your plugin in Tutor (Open edX distribution)'
+name: Open edX Plugin Integration Tests with Tutor
+description: "A Github action to test your Open edX plugin in Tutor"
 inputs:
   app_name:
-    description: 'Application name to test. E.g., eox-tenant.'
+    description: "Open edX plugin or application name to test. E.g., eox-tenant."
     required: true
   tutor_version:
-    description: 'The tutor version matrix to use.'
+    description: "The tutor version matrix to use."
     required: true
   shell_file_to_run:
-    description: 'The path of the shell file to run the integration tests.'
+    description: "The path of the shell file to run the integration tests."
+    required: true
+    default: "scripts/execute_integration_tests.sh"
+  openedx_extra_pip_requirements:
+    description: "Optional extra pip requirements to install in Open edX. E.g: 'package1==1.0 package2>=2.0'"
+    required: false
+    default: ""
+  fixtures_file:
+    description: "Optional path to the plugin's fixtures file to load."
+    required: false
+  openedx_imports_test_file_path:
+    description: "Path to the file that contains the test function for validating Open edX imports. This should be a Python file within your project."
     required: false
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
-  - name: Create a Virtual Environment
-    run: |
-      pip install virtualenv
-      virtualenv venv
-    shell: bash
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        path: ${{ inputs.app_name }}
 
-  - name: Install Tutor
-    run: |
-      source venv/bin/activate
-      if [ "$INPUT_TUTOR_VERSION" = "nightly" ]; then
-        git clone --branch=nightly --depth=1 https://github.com/overhangio/tutor.git
-        chmod 777 tutor -R
-        pip install -e "./tutor[full]"
-      else
-        pip install "tutor$INPUT_TUTOR_VERSION"
-      fi
-    shell: bash
-    env:
-      INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
+    - name: Adjust permissions to execute Tutor commands
+      run: |
+        chmod 777 . -R
+      shell: bash
 
-  - name: Configure Tutor and Launch
-    run: |
-      source venv/bin/activate
-      TUTOR_ROOT="$(pwd)" tutor --version
-      TUTOR_ROOT="$(pwd)" tutor config save
-      TUTOR_ROOT="$(pwd)" tutor mounts add lms,cms,lms-worker,cms-worker:$(pwd)/$INPUT_APP:/openedx/$INPUT_APP
-      chmod 777 . -R
-      if [ "$INPUT_TUTOR_VERSION" = "nightly" ]; then
-        TUTOR_ROOT="$(pwd)" tutor images build openedx
-      fi
-      TUTOR_ROOT="$(pwd)" tutor local launch -I
-    shell: bash
-    env:
-      INPUT_APP: ${{ inputs.app_name }}
-      INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
+    - name: Set Tutor environment variables
+      run: |
+        cat <<EOF >> "$GITHUB_ENV"
+        LMS_HOST=local.edly.io
+        CMS_HOST=studio.local.edly.io
+        TUTOR_ROOT=$(pwd)
+        TUTOR_PLUGINS_ROOT=$(pwd)/plugins/
+        EOF
+      shell: bash
 
-  - name: Run integration tests in lms
-    if: ${{ inputs.shell_file_to_run }}
-    run: |
-      source venv/bin/activate
-      TUTOR_ROOT="$(pwd)" tutor local run lms bash $INPUT_SHELL_FILE
-    shell: bash
-    env:
-      INPUT_SHELL_FILE: /openedx/${{ inputs.app_name }}/${{ inputs.shell_file_to_run }}
+    - name: Create virtualenvs
+      run: |
+        echo "Creating isolated venv for Tutor"
+        python -m venv .tutor_venv
+        echo "Creating isolated venv to run the integration tests"
+        python -m venv .tests_venv
+      shell: bash
+
+    - name: Install and prepare Tutor
+      env:
+        INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
+      run: |
+        source .tutor_venv/bin/activate
+
+        if [ "$INPUT_TUTOR_VERSION" = "nightly" ]; then
+          git clone --branch=nightly --depth=1 https://github.com/overhangio/tutor.git
+          pip install -e ./tutor
+        else
+          pip install "tutor$INPUT_TUTOR_VERSION"
+        fi
+
+        tutor config save --set LMS_HOST=$LMS_HOST --set CMS_HOST=$CMS_HOST
+        tutor local launch -I
+      shell: bash
+
+    - name: Configure Caddyfile and Open edX settings
+      run: |
+        source .tutor_venv/bin/activate
+
+        mkdir -p plugins
+        cp $GITHUB_ACTION_PATH/patches.yml plugins/
+        tutor plugins enable patches
+      shell: bash
+
+    - name: Add mount for Open edX plugin
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor mounts add "lms:$GITHUB_WORKSPACE/${{ inputs.app_name }}:/openedx/${{ inputs.app_name }}"
+        tutor mounts add "cms:$GITHUB_WORKSPACE/${{ inputs.app_name }}:/openedx/${{ inputs.app_name }}"
+      shell: bash
+
+    - name: Recreate containers to apply mounts
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local start -d lms cms
+      shell: bash
+
+    - name: Install Open edX plugin as an editable package
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local exec lms pip install -e /openedx/${{ inputs.app_name }}/
+        tutor local exec cms pip install -e /openedx/${{ inputs.app_name }}/
+      shell: bash
+
+    - name: Install extra requirements
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local exec lms pip install ${{ inputs.openedx_extra_pip_requirements }}
+        tutor local exec cms pip install ${{ inputs.openedx_extra_pip_requirements }}
+      shell: bash
+
+    - name: Run migrations and restart services
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local exec lms python manage.py lms migrate
+        tutor local exec cms python manage.py cms migrate
+        tutor local restart
+      shell: bash
+
+    - name: Import Demo course
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local do importdemocourse
+      shell: bash
+
+    - name: Test Open edX imports in plugin
+      if: ${{ inputs.openedx_imports_test_file_path }}
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local exec lms bash -c "pip install pytest pytest-django"
+        tutor local exec lms bash -c "pytest -s --ds=lms.envs.tutor.test /openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }}"
+      shell: bash
+
+    - name: Load initial data for the tests
+      if: ${{ inputs.fixtures_file }}
+      run: |
+        source .tutor_venv/bin/activate
+
+        echo "Copying fixtures file to the LMS container"
+        tutor local exec lms python manage.py lms loaddata /openedx/${{ inputs.app_name }}/${{ inputs.fixtures_file }}
+      shell: bash
+
+    - name: Curl Heartbeat
+      run: |
+        echo "Curling LMS heartbeat"
+        status_code=$(curl -s -o /dev/null -w "%{http_code}" http://$LMS_HOST/heartbeat)
+        if [ "$status_code" -ne 200 ]; then
+          echo "Error: LMS Heartbeat endpoint returned status code $status_code"
+          exit 1
+        else
+          echo "Heartbeat endpoint returned status code 200"
+        fi
+      shell: bash
+
+    - name: Set DEMO_COURSE_ID environment variable
+      run: |
+        #TODO: remove this once we stop supporting Tutor <18.0.0
+        if [ "${{ inputs.tutor_version }}" = "<18.0.0" ]; then
+          echo "DEMO_COURSE_ID=course-v1:edX+DemoX+Demo_Course" >> $GITHUB_ENV
+        else
+          echo "DEMO_COURSE_ID=course-v1:OpenedX+DemoX+DemoCourse" >> $GITHUB_ENV
+        fi
+      shell: bash
+
+    - name: Run integration tests
+      if: ${{ inputs.shell_file_to_run }}
+      env:
+        DEMO_COURSE_ID: ${{ env.DEMO_COURSE_ID }}
+      run: |
+        source .tests_venv/bin/activate
+
+        cd ${{ inputs.app_name }}
+        chmod +x ./${{ inputs.shell_file_to_run }}
+        ./${{ inputs.shell_file_to_run }}
+      shell: bash
