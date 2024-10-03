@@ -25,8 +25,7 @@ jobs:
           shell_file_to_run: "tests/integration.sh"
           openedx_extra_pip_requirements: "package1==1.0 package2>=2.0"
           fixtures_file: "fixtures/test_data.json"
-          openedx_imports_test_file_path: "tests/integration/import_tests.py"
-          openedx_imports_test_function_name: "test_openedx_imports"
+          openedx_imports_test_file_path: "eox_test/edxapp_wrapper/test_backends.py"
 ```
 
 ## Inputs
@@ -73,13 +72,7 @@ The path to the fixtures file of your plugin to load initial data for the tests.
 
 **Optional**  
 The path to the Python file in your plugin that contains the test function for validating Open edX imports. This path is relative to your plugin directory.  
-* *Example*: `"tests/import_tests.py"`
-
-### `openedx_imports_test_function_name`
-
-**Optional**  
-The name of the function in the specified file that executes the import tests for Open edX.  
-* *Example*: `"test_openedx_imports"`
+* *Example*: `"eox_test/edxapp_wrapper/test_backends.py"`
 
 ## Overview
 
@@ -113,7 +106,7 @@ This GitHub Action automates the process of setting up a Tutor Open edX environm
 
 12. **Import Demo Course**: Imports the Open edX demo course for testing purposes.
 
-13. **Test Open edX Imports in Plugin** *(Optional)*: Runs a test function to validate Open edX imports in your plugin if `openedx_imports_test_file_path` and `openedx_imports_test_function_name` are provided.
+13. **Test Open edX Imports in Plugin** *(Optional)*: Runs pytest to validate Open edX imports in your plugin if `openedx_imports_test_file_path` is provided. The only two dependencies installed to run these tests are `pytest` and `pytest-django`, so ensure that your import tests do not require any extra packages that are not in the plugin's base requirements.
 
 14. **Load Initial Data for the Tests** *(Optional)*: Loads initial data from a fixtures file into the LMS if `fixtures_file` is provided.
 
@@ -141,7 +134,7 @@ This GitHub Action automates the process of setting up a Tutor Open edX environm
 
 - **Paths**: Ensure that the paths provided in the inputs are relative to your plugin directory.
 
-- **Optional Steps**: Steps involving `openedx_imports_test_file_path`, `openedx_imports_test_function_name`, and `fixtures_file` are optional and will only run if the corresponding inputs are provided.
+- **Optional Steps**: Steps involving `openedx_imports_test_file_path` and `fixtures_file` are optional and will only run if the corresponding inputs are provided.
 
 - **Tutor Versions**: Use the matrix strategy to test your plugin against multiple Tutor versions, including the nightly build.
 

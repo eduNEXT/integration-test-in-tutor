@@ -127,11 +127,10 @@ runs:
       shell: bash
 
     - name: Test Open edX imports in plugin
-      if: ${{ inputs.openedx_imports_test_file_path && inputs.openedx_imports_test_function_name }}
+      if: ${{ inputs.openedx_imports_test_file_path }}
       run: |
         source .tutor_venv/bin/activate
 
-        echo "Running test for Open edX imports in plugin with pytest"
         tutor local exec lms bash -c "pip install pytest pytest-django"
         tutor local exec lms bash -c "pytest -s --ds=lms.envs.tutor.test /openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }}"
       shell: bash
