@@ -126,14 +126,19 @@ runs:
         tutor local do importdemocourse
       shell: bash
 
-    - name: Test Open edX imports in plugin
-      if: ${{ inputs.openedx_imports_test_file_path && inputs.openedx_imports_test_function_name }}
+    - name: Create a new venv for testing in the LMS container
       run: |
-        source .tutor_venv/bin/activate
+        tutor local exec lms bash -c "python -m venv /openedx/temp_venv"
+      shell: bash
 
-        echo "Running test for Open edX imports in plugin with pytest"
-        tutor local exec lms bash -c "pip install pytest pytest-django"
-        tutor local exec lms bash -c "pytest -s --ds=lms.envs.tutor.test /openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }}"
+    - name: Install test requirements in the new venv
+      run: |
+        tutor local exec lms bash -c "source /openedx/temp_venv/bin/activate && pip install -e /openedx/${{ inputs.app_name }}/ && cd /openedx/${{ inputs.app_name }} && make install-dev-dependencies
+      shell: bash
+
+    - name: Run tests with pytest in the new venv and adjust PYTHONPATH
+      run: |
+        tutor local exec lms bash -c "source /openedx/temp_venv/bin/activate && export PYTHONPATH=/openedx/edx-platform:/openedx/venv && pytest -s --ds=lms.envs.tutor.test /openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }}"
       shell: bash
 
     - name: Load initial data for the tests
