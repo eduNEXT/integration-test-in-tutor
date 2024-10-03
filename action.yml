@@ -137,7 +137,7 @@ runs:
       run: |
         source .tutor_venv/bin/activate
 
-        tutor local exec lms bash -c "source /openedx/temp_venv/bin/activate && pip install -e /openedx/${{ inputs.app_name }}/ && cd /openedx/${{ inputs.app_name }} && make install-dev-dependencies
+        tutor local exec lms bash -c "source /openedx/temp_venv/bin/activate && pip install -e /openedx/${{ inputs.app_name }}/ && cd /openedx/${{ inputs.app_name }} && make install-dev-dependencies"
       shell: bash
 
     - name: Run tests with pytest in the new venv and adjust PYTHONPATH
