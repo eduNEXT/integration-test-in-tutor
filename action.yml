@@ -14,7 +14,6 @@ inputs:
   openedx_extra_pip_requirements:
     description: "Optional extra pip requirements to install in Open edX. E.g: 'package1==1.0 package2>=2.0'"
     required: false
-    default: ""
   fixtures_file:
     description: "Optional path to the plugin's fixtures file to load."
     required: false
@@ -103,6 +102,7 @@ runs:
       shell: bash
 
     - name: Install extra requirements
+      if: ${{ inputs.openedx_extra_pip_requirements }}
       run: |
         source .tutor_venv/bin/activate
 

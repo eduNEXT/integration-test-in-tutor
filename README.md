@@ -59,7 +59,6 @@ The path to the shell script that runs your integration tests. This path is rela
 
 **Optional**  
 Extra pip requirements to install in Open edX. These are additional Python packages your plugin depends on. Provide them as a space-separated string.  
-* *Default*: `""` (empty string)  
 * *Example*: `"package1==1.0 package2>=2.0"`
 
 ### `fixtures_file`
