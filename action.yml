@@ -7,6 +7,10 @@ inputs:
   tutor_version:
     description: "The tutor version matrix to use."
     required: true
+  python_version:
+    description: 'Python version to use.'
+    required: false
+    default: '3.11'
   shell_file_to_run:
     description: "The path of the shell file to run the integration tests."
     required: true
@@ -24,6 +28,11 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Set Up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python_version }}
+
     - name: Checkout code
       uses: actions/checkout@v4
       with:
