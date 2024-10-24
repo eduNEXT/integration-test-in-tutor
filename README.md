@@ -150,7 +150,7 @@ This GitHub Action automates the process of setting up a Tutor Open edX environm
 
   It's crucial to align the Python version in your virtual environments with the versions supported by the specified Tutor versions. Mismatched Python versions can lead to unexpected errors during Tutor operations and plugin integrations.
 
-  If you need to specify a Python version different from the default provided by the runner, you can an input to set the desired Python version. For example:
+  If you need to specify a Python version different from the default provided by the runner, you can add an input to set the desired Python version. For example:
 
   ```yaml
   - name: Run Integration Tests
