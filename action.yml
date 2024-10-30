@@ -64,16 +64,6 @@ runs:
         python -m venv .tests_venv
       shell: bash
 
-    - name: Install and enable Tutor plugins
-      if: ${{ inputs.tutor_plugins }}
-      run: |
-        source .tutor_venv/bin/activate
-
-        tutor plugins update
-        tutor plugins install ${{ inputs.tutor_plugins }}
-        tutor plugins enable ${{ inputs.tutor_plugins }}
-      shell: bash
-
     - name: Install and prepare Tutor
       env:
         INPUT_TUTOR_VERSION: ${{ inputs.tutor_version }}
@@ -88,6 +78,20 @@ runs:
         fi
 
         tutor config save --set LMS_HOST=$LMS_HOST --set CMS_HOST=$CMS_HOST
+      shell: bash
+
+    - name: Install and enable Tutor plugins
+      if: ${{ inputs.tutor_plugins }}
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor plugins update
+        tutor plugins install ${{ inputs.tutor_plugins }}
+        tutor plugins enable ${{ inputs.tutor_plugins }}
+      shell: bash
+
+    - name: Launch Tutor
+      run: |
         tutor local launch -I
       shell: bash
 
