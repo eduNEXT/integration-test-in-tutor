@@ -11,6 +11,9 @@ inputs:
     description: 'Python version to use.'
     required: false
     default: '3.11'
+  tutor_plugins:
+    description: "The list of Tutor plugins to install."
+    required: false
   shell_file_to_run:
     description: "The path of the shell file to run the integration tests."
     required: true
@@ -76,6 +79,14 @@ runs:
 
         tutor config save --set LMS_HOST=$LMS_HOST --set CMS_HOST=$CMS_HOST
         tutor local launch -I
+      shell: bash
+
+    - name: Enable Tutor plugins
+      if: ${{ inputs.tutor_plugins }}
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor plugins enable ${{ inputs.tutor_plugins }}
       shell: bash
 
     - name: Configure Caddyfile and Open edX settings
