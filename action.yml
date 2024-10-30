@@ -87,6 +87,7 @@ runs:
         source .tutor_venv/bin/activate
 
         tutor plugins update
+        tutor plugins install ${{ inputs.tutor_plugins }}
         tutor plugins enable ${{ inputs.tutor_plugins }}
       shell: bash
 
