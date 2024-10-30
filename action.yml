@@ -92,6 +92,8 @@ runs:
 
     - name: Launch Tutor
       run: |
+        source .tutor_venv/bin/activate
+
         tutor local launch -I
       shell: bash
 
