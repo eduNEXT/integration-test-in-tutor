@@ -90,13 +90,6 @@ runs:
         tutor plugins enable ${{ inputs.tutor_plugins }}
       shell: bash
 
-    - name: Launch Tutor
-      run: |
-        source .tutor_venv/bin/activate
-
-        tutor local launch -I
-      shell: bash
-
     - name: Configure Caddyfile and Open edX settings
       run: |
         source .tutor_venv/bin/activate
@@ -104,6 +97,13 @@ runs:
         mkdir -p plugins
         cp $GITHUB_ACTION_PATH/patches.yml plugins/
         tutor plugins enable patches
+      shell: bash
+
+    - name: Launch Tutor
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local launch -I
       shell: bash
 
     - name: Add mount for Open edX plugin
