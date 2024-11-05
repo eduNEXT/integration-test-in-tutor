@@ -107,9 +107,9 @@ This GitHub Action automates the process of setting up a Tutor Open edX environm
 7. **Install and Enable Tutor Plugins**: Installs and enables the specified Tutor plugins
 specified in `tutor_plugins`.
 
-8. **Launch Tutor**: Launches the Open edX platform using Tutor with the specified configuration.
+8. **Configure Caddyfile and Open edX Settings**: Configures the web server and Open edX settings using Tutor plugins, to enable running integration tests from the plugin with multiple sites.
 
-9. **Configure Caddyfile and Open edX Settings**: Configures the web server and Open edX settings using Tutor plugins, to enable running integration tests from the plugin with multiple sites.
+9. **Launch Tutor**: Launches the Open edX platform using Tutor with the specified configuration.
 
 10. **Add Mount for Plugin**: Mounts your plugin into the LMS and CMS containers.
 
