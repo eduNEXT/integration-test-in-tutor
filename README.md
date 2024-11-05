@@ -57,7 +57,7 @@ The python version to run the integration tests with. Make sure to use a version
 ### `tutor_plugins`
 
 **Optional**  
-The list of Tutor plugins to install. Provide them as a space-separated string.  
+The list of Tutor Index plugins to install. Only plugins available in the official Tutor plugin index can be installed using this option. Provide them as a space-separated string.
 * *Example*: `"plugin1 plugin2"`
 
 ### `shell_file_to_run`
