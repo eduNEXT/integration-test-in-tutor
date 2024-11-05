@@ -12,7 +12,7 @@ inputs:
     required: false
     default: '3.11'
   tutor_plugins:
-    description: "The list of Tutor plugins to install. E.g: 'plugin1 plugin2'"
+    description: "The list of Tutor indexed plugins to install. E.g: 'plugin1 plugin2'"
     required: false
   shell_file_to_run:
     description: "The path of the shell file to run the integration tests."
