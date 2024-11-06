@@ -154,6 +154,13 @@ runs:
         tutor local do importdemocourse
       shell: bash
 
+    - name: Populate Retirement States
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local exec lms python manage.py lms populate_retirement_states
+      shell: bash
+
     - name: Test Open edX imports in plugin
       if: ${{ inputs.openedx_imports_test_file_path }}
       run: |
