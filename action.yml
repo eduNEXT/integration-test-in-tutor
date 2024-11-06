@@ -194,6 +194,13 @@ runs:
         fi
       shell: bash
 
+    - name: Populate Retirement States
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local exec lms python manage.py lms populate_retirement_states
+      shell: bash
+
     - name: Run integration tests
       if: ${{ inputs.shell_file_to_run }}
       env:
