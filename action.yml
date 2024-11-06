@@ -213,3 +213,11 @@ runs:
 
         tutor local logs lms
       shell: bash
+
+    - name: Print Retirement State objects
+      if: ${{ always() }}
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local exec lms python manage.py lms shell -c "from openedx.core.djangoapps.user_api.models import RetirementState;print(RetirementState.objects.all())"
+      shell: bash
