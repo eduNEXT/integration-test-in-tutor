@@ -23,6 +23,7 @@ jobs:
           app_name: "eox-test"
           tutor_version: ${{ matrix.tutor_version }}
           tutor_plugins: "plugin1 plugin2"
+          tutor_extra_commands_path: "scripts/extra_commands.sh"
           shell_file_to_run: "tests/integration.sh"
           openedx_extra_pip_requirements: "package1==1.0 package2>=2.0"
           fixtures_file: "fixtures/test_data.json"
@@ -59,6 +60,12 @@ The python version to run the integration tests with. Make sure to use a version
 **Optional**  
 The list of Tutor Index plugins to install as a space-separated string. Only plugins available in the official Tutor plugin index can be installed using this option. For more information, you can refer to the [official Tutor documentation](https://docs.tutor.edly.io/reference/cli/plugins.html#tutor-plugins-install).
 * *Example*: `"plugin1 plugin2"`
+
+### `tutor_extra_commands_path`
+
+**Optional**
+The path to the shell script that contains Tutor extra commands to run after installing Tutor. This path is relative to your plugin directory.
+* *Example*: `"scripts/extra_commands.sh"`
 
 ### `shell_file_to_run`
 
@@ -142,7 +149,9 @@ specified in `tutor_plugins`.
     # Use DEMO_COURSE_ID in your tests
     ```
 
-20. **Run Integration Tests**: Activates the test virtual environment and runs your integration tests using the specified shell script.
+20. **Run Tutor Extra Commands** *(Optional)*: Executes the shell script specified in `tutor_extra_commands_path` to run additional Tutor commands after installing Tutor.
+`
+21. **Run Integration Tests**: Activates the test virtual environment and runs your integration tests using the specified shell script.
 
 ## Notes
 
@@ -151,7 +160,7 @@ specified in `tutor_plugins`.
 
 - **Paths**: Ensure that the paths provided in the inputs are relative to your plugin directory.
 
-- **Optional Steps**: Steps involving `openedx_imports_test_file_path` and `fixtures_file` are optional and will only run if the corresponding inputs are provided.
+- **Optional Steps**: Steps involving `openedx_imports_test_file_path`, `fixtures_file`, `tutor_extra_commands_path` and `tutor_plugins` are optional and will only run if the corresponding inputs are provided.
 
 - **Tutor Versions**: Use the matrix strategy to test your plugin against multiple Tutor versions, including the nightly build.
 
