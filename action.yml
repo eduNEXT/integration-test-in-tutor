@@ -11,6 +11,12 @@ inputs:
     description: 'Python version to use.'
     required: false
     default: '3.11'
+  tutor_plugins:
+    description: "The list of Tutor indexed plugins to install. E.g: 'plugin1 plugin2'"
+    required: false
+  tutor_extra_commands_path:
+    description: "The path of the shell file to run the Tutor extra commands."
+    required: false
   shell_file_to_run:
     description: "The path of the shell file to run the integration tests."
     required: true
@@ -75,7 +81,16 @@ runs:
         fi
 
         tutor config save --set LMS_HOST=$LMS_HOST --set CMS_HOST=$CMS_HOST
-        tutor local launch -I
+      shell: bash
+
+    - name: Install and enable Tutor plugins
+      if: ${{ inputs.tutor_plugins }}
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor plugins update
+        tutor plugins install ${{ inputs.tutor_plugins }}
+        tutor plugins enable ${{ inputs.tutor_plugins }}
       shell: bash
 
     - name: Configure Caddyfile and Open edX settings
@@ -85,6 +100,13 @@ runs:
         mkdir -p plugins
         cp $GITHUB_ACTION_PATH/patches.yml plugins/
         tutor plugins enable patches
+      shell: bash
+
+    - name: Launch Tutor
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local launch -I
       shell: bash
 
     - name: Add mount for Open edX plugin
@@ -173,6 +195,16 @@ runs:
         else
           echo "DEMO_COURSE_ID=course-v1:OpenedX+DemoX+DemoCourse" >> $GITHUB_ENV
         fi
+      shell: bash
+
+    - name: Run Tutor extra commands
+      if: ${{ inputs.tutor_extra_commands_path }}
+      run: |
+        source .tutor_venv/bin/activate
+
+        cd ${{ inputs.app_name }}
+        chmod +x ./${{ inputs.tutor_extra_commands_path }}
+        ./${{ inputs.tutor_extra_commands_path }}
       shell: bash
 
     - name: Run integration tests
