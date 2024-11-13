@@ -18,7 +18,7 @@ inputs:
     description: "Optional path to the folder containing the inline Tutor plugins to install. E.g: 'plugins'"
     required: false
   tutor_extra_commands_path:
-    description: 'The path of the shell file to run the Tutor extra commands.'
+    description: 'The path of the shell file to run the extra Tutor commands.'
     required: false
   shell_file_to_run:
     description: 'The path of the shell file to run the integration tests.'
@@ -50,6 +50,11 @@ runs:
     - name: Adjust permissions to execute Tutor commands
       run: |
         chmod 777 . -R
+      shell: bash
+
+    - name: Set Up plugins directory
+      run: |
+        mkdir -p plugins
       shell: bash
 
     - name: Set Tutor environment variables
@@ -86,7 +91,7 @@ runs:
         tutor config save --set LMS_HOST=$LMS_HOST --set CMS_HOST=$CMS_HOST
       shell: bash
 
-    - name: Install and enable Tutor plugins
+    - name: Install and enable Tutor index plugins
       if: ${{ inputs.tutor_plugins }}
       run: |
         source .tutor_venv/bin/activate
@@ -96,13 +101,11 @@ runs:
         tutor plugins enable ${{ inputs.tutor_plugins }}
       shell: bash
 
-    - name: Configure Caddyfile and Open edX settings
+    - name: Copy patches.yml to plugins directory
       run: |
         source .tutor_venv/bin/activate
 
-        mkdir -p plugins
         cp $GITHUB_ACTION_PATH/patches.yml plugins/
-        tutor plugins enable patches
       shell: bash
 
     - name: Launch Tutor
@@ -135,7 +138,7 @@ runs:
         tutor local exec cms pip install -e /openedx/${{ inputs.app_name }}/
       shell: bash
 
-    - name: Enable Inline Tutor plugins
+    - name: Enable inline Tutor plugins
       env:
         INLINE_TUTOR_PLUGINS_PATH: ${{ inputs.app_name }}/${{ inputs.inline_tutor_plugins_folder }}
       run: |
@@ -216,7 +219,7 @@ runs:
         fi
       shell: bash
 
-    - name: Run Tutor extra commands
+    - name: Run extra Tutor commands
       if: ${{ inputs.tutor_extra_commands_path }}
       run: |
         source .tutor_venv/bin/activate
@@ -227,7 +230,6 @@ runs:
       shell: bash
 
     - name: Run integration tests
-      if: ${{ inputs.shell_file_to_run }}
       env:
         DEMO_COURSE_ID: ${{ env.DEMO_COURSE_ID }}
       run: |
