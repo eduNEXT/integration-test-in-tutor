@@ -37,6 +37,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
+
     - name: Set Up Python
       uses: actions/setup-python@v5
       with:
@@ -55,6 +56,12 @@ runs:
     - name: Set Up plugins directory
       run: |
         mkdir -p plugins
+      shell: bash
+
+    - name: Install necessary packages
+      run: |
+        wget http://nz2.archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.22_amd64.deb
+        sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.23_amd64.deb
       shell: bash
 
     - name: Set Tutor environment variables
@@ -115,6 +122,20 @@ runs:
         tutor local launch -I
       shell: bash
 
+    - name: Show logs LMS
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local logs lms
+      shell: bash
+
+    - name: Show logs CMS
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local logs cms
+      shell: bash
+
     - name: Add mount for Open edX plugin
       run: |
         source .tutor_venv/bin/activate
@@ -128,6 +149,20 @@ runs:
         source .tutor_venv/bin/activate
 
         tutor local start -d lms cms
+      shell: bash
+
+    - name: Show logs LMS
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local logs lms
+      shell: bash
+
+    - name: Show logs CMS
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local logs cms
       shell: bash
 
     - name: Install Open edX plugin as an editable package
