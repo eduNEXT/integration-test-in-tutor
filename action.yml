@@ -139,13 +139,11 @@ runs:
       shell: bash
 
     - name: Enable inline Tutor plugins
-      env:
-        INLINE_TUTOR_PLUGINS_PATH: ${{ inputs.app_name }}/${{ inputs.inline_tutor_plugins_folder }}
       run: |
         source .tutor_venv/bin/activate
 
-        if [ -d "$INLINE_TUTOR_PLUGINS_PATH" ]; then
-          cp -r "$INLINE_TUTOR_PLUGINS_PATH"/* plugins/
+        if [ -n "${{ inputs.inline_tutor_plugins_folder }}" ]; then
+          cp -r "${{ inputs.app_name }}/${{ inputs.inline_tutor_plugins_folder }}"/* plugins/
         fi
 
         for plugin_file in plugins/*; do
