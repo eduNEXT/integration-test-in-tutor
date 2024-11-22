@@ -133,21 +133,23 @@ specified in `tutor_plugins` input.
 
 13. **Install Open edX Plugin as an Editable Package**: Installs your plugin in editable mode inside both LMS and CMS containers.
 
-14. **Enable Inline Tutor Plugins**: Installs the Inline Tutor plugins inside the plugins folder.
+14. **Copy Inline Tutor Plugins to the Plugins Folder**: Copies the inline Tutor plugins of your plugin to the plugins folder.
 
-15. **Install Extra Requirements**: Installs any additional Python packages specified in `openedx_extra_pip_requirements`.
+15. **Enable Inline Tutor Plugins**: Installs the inline Tutor plugins inside the plugins folder.
 
-16. **Run Migrations and Restart Services**: Applies database migrations and restarts Tutor services.
+16. **Install Extra Requirements**: Installs any additional Python packages specified in `openedx_extra_pip_requirements`.
 
-17. **Import Demo Course**: Imports the Open edX demo course for testing purposes.
+17. **Run Migrations and Restart Services**: Applies database migrations and restarts Tutor services.
 
-18. **Test Open edX Imports in Plugin** *(Optional)*: Runs pytest to validate Open edX imports in your plugin if `openedx_imports_test_file_path` is provided. The only two dependencies installed to run these tests are `pytest` and `pytest-django`, so ensure that your import tests do not require any extra packages that are not in the plugin's base requirements.
+18. **Import Demo Course**: Imports the Open edX demo course for testing purposes.
 
-19. **Load Initial Data for the Tests** *(Optional)*: Loads initial data from a fixtures file into the LMS if `fixtures_file` is provided.
+19. **Test Open edX Imports in Plugin** *(Optional)*: Runs pytest to validate Open edX imports in your plugin if `openedx_imports_test_file_path` is provided. The only two dependencies installed to run these tests are `pytest` and `pytest-django`, so ensure that your import tests do not require any extra packages that are not in the plugin's base requirements.
 
-20. **Check LMS Heartbeat**: Verifies that the LMS is running by hitting the heartbeat endpoint.
+20. **Load Initial Data for the Tests** *(Optional)*: Loads initial data from a fixtures file into the LMS if `fixtures_file` is provided.
 
-21. **Set `DEMO_COURSE_ID` Environment Variable**:  
+21. **Check LMS Heartbeat**: Verifies that the LMS is running by hitting the heartbeat endpoint.
+
+22. **Set `DEMO_COURSE_ID` Environment Variable**:  
     Sets the `DEMO_COURSE_ID` environment variable based on the Tutor version. This variable allows you to refer to the demo course in your tests, which can be helpful when you need to interact with course content during testing.
     
     **Usage in Your Tests**:  
@@ -160,9 +162,9 @@ specified in `tutor_plugins` input.
     # Use DEMO_COURSE_ID in your tests
     ```
 
-22. **Run Extra Tutor Commands** *(Optional)*: Executes the shell script specified in `tutor_extra_commands_path` to run additional Tutor commands after installing Tutor.
+23. **Run Extra Tutor Commands** *(Optional)*: Executes the shell script specified in `tutor_extra_commands_path` to run additional Tutor commands after installing Tutor.
 
-23. **Run Integration Tests**: Activates the test virtual environment and runs your integration tests using the specified shell script.
+24. **Run Integration Tests**: Activates the test virtual environment and runs your integration tests using the specified shell script.
 
 ## Notes
 
@@ -171,7 +173,7 @@ specified in `tutor_plugins` input.
 
 - **Paths**: Ensure that the paths provided in the inputs are relative to your plugin directory.
 
-- **Optional Steps**: Steps involving `openedx_imports_test_file_path`, `openedx_extra_pip_requirements`, `fixtures_file`, `tutor_extra_commands_path` and `tutor_plugins` are optional and will only run if the corresponding inputs are provided.
+- **Optional Steps**: Steps involving `openedx_imports_test_file_path`, `openedx_extra_pip_requirements`, `fixtures_file`, `tutor_extra_commands_path`, `inline_tutor_plugins_folder` and `tutor_plugins` are optional and will only run if the corresponding inputs are provided.
 
 - **Tutor Versions**: Use the matrix strategy to test your plugin against multiple Tutor versions, including the nightly build.
 

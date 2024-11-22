@@ -138,15 +138,17 @@ runs:
         tutor local exec cms pip install -e /openedx/${{ inputs.app_name }}/
       shell: bash
 
-    - name: Enable inline Tutor plugins
-      env:
-        INLINE_TUTOR_PLUGINS_PATH: ${{ inputs.app_name }}/${{ inputs.inline_tutor_plugins_folder }}
+    - name: Copy inline Tutor plugins to the plugins directory
+      if: ${{ inputs.inline_tutor_plugins_folder }}
       run: |
         source .tutor_venv/bin/activate
 
-        if [ -d "$INLINE_TUTOR_PLUGINS_PATH" ]; then
-          cp -r "$INLINE_TUTOR_PLUGINS_PATH"/* plugins/
-        fi
+        cp -r "${{ inputs.app_name }}/${{ inputs.inline_tutor_plugins_folder }}"/* plugins/
+      shell: bash
+
+    - name: Enable inline Tutor plugins
+      run: |
+        source .tutor_venv/bin/activate
 
         for plugin_file in plugins/*; do
           plugin_name=$(basename "$plugin_file" | cut -f1 -d '.')
