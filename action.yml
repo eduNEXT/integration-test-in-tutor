@@ -81,8 +81,8 @@ runs:
       run: |
         source .tutor_venv/bin/activate
 
-        if [ "$INPUT_TUTOR_VERSION" = "nightly" ]; then
-          git clone --branch=nightly --depth=1 https://github.com/overhangio/tutor.git
+        if [ "$INPUT_TUTOR_VERSION" = "main" ]; then
+          git clone --branch=main --depth=1 https://github.com/overhangio/tutor.git
           pip install -e ./tutor
         else
           pip install "tutor$INPUT_TUTOR_VERSION"

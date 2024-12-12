@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        tutor_version: ["<18.0.0", "==18.0.3", "<19.0.0", "nightly"]
+        tutor_version: ["<18.0.0", "==18.0.3", "<19.0.0", "main"]
 
     steps:
       - name: Run Integration Tests
@@ -46,10 +46,10 @@ The version of Tutor where you want to run the integration tests. You can specif
 
 * A specific version number (e.g., `"==18.0.3"`).
 * A comparison operator with a version (e.g., `"<18.0.0"`).
-* The string `"nightly"` to use the latest development version.
+* The string `"main"` to use the latest development version.
 
 > [!IMPORTANT]
-> This action is officially supported and tested with Tutor versions corresponding to the current and immediate previous Open edX releases, as well as the nightly build. Using other Tutor versions is not guaranteed to be supported.
+> This action is officially supported and tested with Tutor versions corresponding to the current and immediate previous Open edX releases, as well as the main (formerly known as nightly) build. Using other Tutor versions is not guaranteed to be supported.
 
 ### `python_version`
 
@@ -117,7 +117,7 @@ This GitHub Action automates the process of setting up a Tutor Open edX environm
 
 7. **Install and Prepare Tutor**: Installs the specified version of Tutor.
    
-   - If `tutor_version` is set to `"nightly"`, clones the Tutor repository from the `nightly` branch.
+   - If `tutor_version` is set to `"main"`, clones the Tutor repository from the `main` branch.
    - Saves Tutor configuration.
 
 8. **Install and Enable Tutor Plugins** *(Optional)*: Installs and enables the specified Tutor plugins
@@ -168,14 +168,14 @@ specified in `tutor_plugins` input.
 
 ## Notes
 
-- **Using the `"nightly"` Version of Tutor**:  
-  The `"nightly"` option allows you to test your plugin against the latest development code of Tutor. This is useful for ensuring compatibility with upcoming features or changes. Be aware that the nightly version may be less stable and could introduce breaking changes. When using `"nightly"`, the action clones the Tutor repository from the `nightly` branch and uses pre-built Tutor images that are published daily to Docker Hub. These images include the latest changes from the master branch at the time of the build. This approach significantly reduces the execution time and conserves the runner's resources by eliminating the overhead of building images during the workflow.
+- **Using the `"main"` Version of Tutor**:  
+  The `"main"` option allows you to test your plugin against the latest development code of Tutor. This is useful for ensuring compatibility with upcoming features or changes. Be aware that the main version may be less stable and could introduce breaking changes. When using `"main"`, the action clones the Tutor repository from the `main` branch and uses pre-built Tutor images that are published daily to Docker Hub. These images include the latest changes from the master branch at the time of the build. This approach significantly reduces the execution time and conserves the runner's resources by eliminating the overhead of building images during the workflow.
 
 - **Paths**: Ensure that the paths provided in the inputs are relative to your plugin directory.
 
 - **Optional Steps**: Steps involving `openedx_imports_test_file_path`, `openedx_extra_pip_requirements`, `fixtures_file`, `tutor_extra_commands_path`, `inline_tutor_plugins_folder` and `tutor_plugins` are optional and will only run if the corresponding inputs are provided.
 
-- **Tutor Versions**: Use the matrix strategy to test your plugin against multiple Tutor versions, including the nightly build.
+- **Tutor Versions**: Use the matrix strategy to test your plugin against multiple Tutor versions, including the main build.
 
 - **Dependencies**: If your integration tests require additional dependencies, specify them in `openedx_extra_pip_requirements` or handle them within your `shell_file_to_run`.
 
@@ -204,7 +204,7 @@ specified in `tutor_plugins` input.
           python_version: '3.8'
         - tutor_version: '<19.0.0'
           python_version: '3.9'
-        - tutor_version: 'nightly'
+        - tutor_version: 'main'
           python_version: '3.10'
   ```
 
