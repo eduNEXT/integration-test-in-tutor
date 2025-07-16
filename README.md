@@ -99,6 +99,19 @@ The path to the fixtures file of your plugin to load initial data for the tests.
 The path to the Python file in your plugin that contains the test function for validating Open edX imports. This path is relative to your plugin directory.  
 * *Example*: `"eox_test/edxapp_wrapper/test_backends.py"`
 
+### `ssh_private_key`  
+
+**Optional**  
+A private SSH key (usually stored as a GitHub Secret) that allows cloning of private repositories containing additional Open edX requirements.  
+* *Example*: `${{ secrets.SERVICE_USER_SSH_KEY }}`  
+
+### `openedx_private_requirements`  
+
+**Optional**  
+A space-separated list of private Git repositories to be cloned and installed inside LMS and CMS. Each entry must specify the repository URL and optionally a branch/tag.  
+* *Example*: `"git@github.com:org/repo1.git@main git@github.com:org/repo2.git@v1.0.0"`
+
+
 ## Overview
 
 This GitHub Action automates the process of setting up a Tutor Open edX environment to test your plugin. It performs the following steps:
@@ -127,29 +140,44 @@ specified in `tutor_plugins` input.
 
 10. **Launch Tutor**: Launches the Open edX platform using Tutor with the specified configuration.
 
-11. **Add Mount for Plugin**: Mounts your plugin into the LMS and CMS containers.
+11. **Setup SSH Agent for Private Repositories** *(Optional)*:  
+    If `ssh_private_key` is provided, configures an SSH agent (`webfactory/ssh-agent`) to authenticate against private repositories.  
 
-12. **Recreate Containers**: Recreates the LMS and CMS containers to apply the changes.
+12. **Add GitHub to Known Hosts** *(Optional)*:  
+    Ensures that `github.com` is trusted for SSH connections, preventing host authenticity errors during cloning.  
 
-13. **Install Open edX Plugin as an Editable Package**: Installs your plugin in editable mode inside both LMS and CMS containers.
+13. **Clone Private Requirements** *(Optional)*:  
+    If `openedx_private_requirements` is provided, clones each specified repository into a `private_requirements` directory with correct permissions.  
 
-14. **Copy Inline Tutor Plugins to the Plugins Folder**: Copies the inline Tutor plugins of your plugin to the plugins folder.
+14. **Add Mount for Private Requirements** *(Optional)*:  
+    Mounts the `private_requirements` directory into both LMS and CMS containers.  
 
-15. **Enable Inline Tutor Plugins**: Installs the inline Tutor plugins inside the plugins folder.
+15. **Add Mount for Plugin**: Mounts your plugin into the LMS and CMS containers.
 
-16. **Install Extra Requirements**: Installs any additional Python packages specified in `openedx_extra_pip_requirements`.
+16. **Recreate Containers**: Recreates the LMS and CMS containers to apply the changes.
 
-17. **Run Migrations and Restart Services**: Applies database migrations and restarts Tutor services.
+17. **Install Private Requirements inside LMS and CMS** *(Optional)*:  
+    Runs `pip install` for each cloned repository inside both LMS and CMS environments.  
 
-18. **Import Demo Course**: Imports the Open edX demo course for testing purposes.
+18. **Install Open edX Plugin as an Editable Package**: Installs your plugin in editable mode inside both LMS and CMS containers.
 
-19. **Test Open edX Imports in Plugin** *(Optional)*: Runs pytest to validate Open edX imports in your plugin if `openedx_imports_test_file_path` is provided. The only two dependencies installed to run these tests are `pytest` and `pytest-django`, so ensure that your import tests do not require any extra packages that are not in the plugin's base requirements.
+19. **Copy Inline Tutor Plugins to the Plugins Folder**: Copies the inline Tutor plugins of your plugin to the plugins folder.
 
-20. **Load Initial Data for the Tests** *(Optional)*: Loads initial data from a fixtures file into the LMS if `fixtures_file` is provided.
+20. **Enable Inline Tutor Plugins**: Installs the inline Tutor plugins inside the plugins folder.
 
-21. **Check LMS Heartbeat**: Verifies that the LMS is running by hitting the heartbeat endpoint.
+21. **Install Extra Requirements**: Installs any additional Python packages specified in `openedx_extra_pip_requirements`.
 
-22. **Set `DEMO_COURSE_ID` Environment Variable**:  
+22. **Run Migrations and Restart Services**: Applies database migrations and restarts Tutor services.
+
+23. **Import Demo Course**: Imports the Open edX demo course for testing purposes.
+
+24. **Test Open edX Imports in Plugin** *(Optional)*: Runs pytest to validate Open edX imports in your plugin if `openedx_imports_test_file_path` is provided. The only two dependencies installed to run these tests are `pytest` and `pytest-django`, so ensure that your import tests do not require any extra packages that are not in the plugin's base requirements.
+
+25. **Load Initial Data for the Tests** *(Optional)*: Loads initial data from a fixtures file into the LMS if `fixtures_file` is provided.
+
+26. **Check LMS Heartbeat**: Verifies that the LMS is running by hitting the heartbeat endpoint.
+
+27. **Set `DEMO_COURSE_ID` Environment Variable**:  
     Sets the `DEMO_COURSE_ID` environment variable based on the Tutor version. This variable allows you to refer to the demo course in your tests, which can be helpful when you need to interact with course content during testing.
     
     **Usage in Your Tests**:  
@@ -162,9 +190,9 @@ specified in `tutor_plugins` input.
     # Use DEMO_COURSE_ID in your tests
     ```
 
-23. **Run Extra Tutor Commands** *(Optional)*: Executes the shell script specified in `tutor_extra_commands_path` to run additional Tutor commands after installing Tutor.
+28. **Run Extra Tutor Commands** *(Optional)*: Executes the shell script specified in `tutor_extra_commands_path` to run additional Tutor commands after installing Tutor.
 
-24. **Run Integration Tests**: Activates the test virtual environment and runs your integration tests using the specified shell script.
+29. **Run Integration Tests**: Activates the test virtual environment and runs your integration tests using the specified shell script.
 
 ## Notes
 

@@ -33,6 +33,12 @@ inputs:
   openedx_imports_test_file_path:
     description: 'Path to the file that contains the test function for validating Open edX imports. This should be a Python file within your project.'
     required: false
+  ssh_private_key:
+    description: 'Service user SSH key for repository checkout'
+    required: false
+  openedx_private_requirements:
+    description: "Optional list of SSH Git repos to install inside Open edX. E.g: 'git@github.com:org/repo1.git@main git@github.com:org/repo2.git@v1.0.0'"
+    required: false
 
 runs:
   using: 'composite'
@@ -115,6 +121,49 @@ runs:
         tutor local launch -I
       shell: bash
 
+    - name: Setup SSH agent for private repositories cloning
+      if: ${{ inputs.ssh_private_key }}
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ inputs.ssh_private_key }}
+
+    - name: Add GitHub to known hosts
+      run: |
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+      shell: bash
+
+    - name: Clone Open edX private pip requirements
+      if: ${{ inputs.openedx_private_requirements }}
+      run: |
+        mkdir -m 777 -p private_requirements
+        cd private_requirements
+
+        for entry in ${{ inputs.openedx_private_requirements }}; do
+          repo_url="${entry%@*}"
+          branch="${entry##*@}"
+
+          echo "Repo URL: $repo_url"
+          echo "Branch/Tag: $branch"
+
+          if [ "$repo_url" = "$entry" ]; then
+            git clone "$repo_url"
+          else
+            git clone --branch "$branch" "$repo_url"
+          fi
+        done
+
+        chmod -R a+rwX .
+      shell: bash
+
+    - name: Add mount for private pip requirements
+      if: ${{ inputs.openedx_private_requirements }}
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor mounts add "lms:$GITHUB_WORKSPACE/private_requirements:/openedx/private_requirements"
+        tutor mounts add "cms:$GITHUB_WORKSPACE/private_requirements:/openedx/private_requirements"
+      shell: bash
+
     - name: Add mount for Open edX plugin
       run: |
         source .tutor_venv/bin/activate
@@ -128,6 +177,25 @@ runs:
         source .tutor_venv/bin/activate
 
         tutor local start -d lms cms
+      shell: bash
+
+    - name: Pip install private requirements inside LMS and CMS
+      if: ${{ inputs.openedx_private_requirements }}
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local exec lms bash -c '
+          for d in /openedx/private_requirements/*; do
+            echo "Installing $d..."
+            pip install "$d"
+          done
+        '
+        tutor local exec cms bash -c '
+          for d in /openedx/private_requirements/*; do
+            echo "Installing $d..."
+            pip install "$d"
+          done
+        '
       shell: bash
 
     - name: Install Open edX plugin as an editable package
