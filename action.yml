@@ -176,7 +176,25 @@ runs:
         tutor mounts add "cms:$GITHUB_WORKSPACE/${{ inputs.app_name }}:/openedx/${{ inputs.app_name }}"
       shell: bash
 
-    - name: Recreate containers to apply mounts
+    - name: Copy inline Tutor plugins to the plugins directory
+      if: ${{ inputs.inline_tutor_plugins_folder }}
+      run: |
+        source .tutor_venv/bin/activate
+
+        cp -r "${{ inputs.app_name }}/${{ inputs.inline_tutor_plugins_folder }}"/* plugins/
+      shell: bash
+
+    - name: Enable inline Tutor plugins
+      run: |
+        source .tutor_venv/bin/activate
+
+        for plugin_file in plugins/*; do
+          plugin_name=$(basename "$plugin_file" | cut -f1 -d '.')
+          tutor plugins enable "$plugin_name"
+        done
+      shell: bash
+
+    - name: Recreate containers to apply mounts and plugins
       run: |
         source .tutor_venv/bin/activate
 
@@ -208,24 +226,6 @@ runs:
 
         tutor local exec lms pip install -e /openedx/${{ inputs.app_name }}/
         tutor local exec cms pip install -e /openedx/${{ inputs.app_name }}/
-      shell: bash
-
-    - name: Copy inline Tutor plugins to the plugins directory
-      if: ${{ inputs.inline_tutor_plugins_folder }}
-      run: |
-        source .tutor_venv/bin/activate
-
-        cp -r "${{ inputs.app_name }}/${{ inputs.inline_tutor_plugins_folder }}"/* plugins/
-      shell: bash
-
-    - name: Enable inline Tutor plugins
-      run: |
-        source .tutor_venv/bin/activate
-
-        for plugin_file in plugins/*; do
-          plugin_name=$(basename "$plugin_file" | cut -f1 -d '.')
-          tutor plugins enable "$plugin_name"
-        done
       shell: bash
 
     - name: Install extra requirements
