@@ -129,13 +129,13 @@ specified in `tutor_plugins` input.
 
 11. **Add Mount for Plugin**: Mounts your plugin into the LMS and CMS containers.
 
-12. **Recreate Containers**: Recreates the LMS and CMS containers to apply the changes.
+12. **Copy Inline Tutor Plugins to the Plugins Folder**: Copies the inline Tutor plugins of your plugin to the plugins folder.
 
-13. **Install Open edX Plugin as an Editable Package**: Installs your plugin in editable mode inside both LMS and CMS containers.
+13. **Enable Inline Tutor Plugins**: Installs the inline Tutor plugins inside the plugins folder.
 
-14. **Copy Inline Tutor Plugins to the Plugins Folder**: Copies the inline Tutor plugins of your plugin to the plugins folder.
+14. **Recreate Containers**: Recreates the LMS and CMS containers to apply the changes.
 
-15. **Enable Inline Tutor Plugins**: Installs the inline Tutor plugins inside the plugins folder.
+15. **Install Open edX Plugin as an Editable Package**: Installs your plugin in editable mode inside both LMS and CMS containers.
 
 16. **Install Extra Requirements**: Installs any additional Python packages specified in `openedx_extra_pip_requirements`.
 
