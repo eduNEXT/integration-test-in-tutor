@@ -112,7 +112,11 @@ runs:
       run: |
         source .tutor_venv/bin/activate
 
-        tutor local launch -I
+        tutor local dc down
+        rm -rf $(tutor config printroot)/data
+        tutor local start -d
+        tutor local do init
+        tutor local restart
       shell: bash
 
     - name: Add mount for Open edX plugin
