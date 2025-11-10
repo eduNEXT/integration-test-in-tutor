@@ -127,21 +127,6 @@ runs:
         tutor mounts add "cms:$GITHUB_WORKSPACE/${{ inputs.app_name }}:/openedx/${{ inputs.app_name }}"
       shell: bash
 
-    - name: Recreate containers to apply mounts
-      run: |
-        source .tutor_venv/bin/activate
-
-        tutor local start -d lms cms
-      shell: bash
-
-    - name: Install Open edX plugin as an editable package
-      run: |
-        source .tutor_venv/bin/activate
-
-        tutor local exec lms pip install -e /openedx/${{ inputs.app_name }}/
-        tutor local exec cms pip install -e /openedx/${{ inputs.app_name }}/
-      shell: bash
-
     - name: Copy inline Tutor plugins to the plugins directory
       if: ${{ inputs.inline_tutor_plugins_folder }}
       run: |
@@ -158,6 +143,21 @@ runs:
           plugin_name=$(basename "$plugin_file" | cut -f1 -d '.')
           tutor plugins enable "$plugin_name"
         done
+      shell: bash
+
+    - name: Recreate containers to apply mounts and plugins
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local start -d lms cms
+      shell: bash
+
+    - name: Install Open edX plugin as an editable package
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor local exec lms pip install -e /openedx/${{ inputs.app_name }}/
+        tutor local exec cms pip install -e /openedx/${{ inputs.app_name }}/
       shell: bash
 
     - name: Install extra requirements
