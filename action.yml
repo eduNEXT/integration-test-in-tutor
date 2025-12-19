@@ -1,5 +1,6 @@
 name: Open edX Plugin Integration Tests with Tutor
 description: 'A Github action to test your Open edX plugin in Tutor'
+
 inputs:
   app_name:
     description: 'Open edX plugin or application name to test. E.g., eox-tenant.'
@@ -104,10 +105,38 @@ runs:
     - name: Copy patches.yml to plugins directory
       run: |
         source .tutor_venv/bin/activate
-
         cp $GITHUB_ACTION_PATH/patches.yml plugins/
       shell: bash
 
+    # Configure mounts BEFORE starting Tutor so containers start with final config
+    - name: Add mount for Open edX plugin
+      run: |
+        source .tutor_venv/bin/activate
+
+        tutor mounts add "lms:$GITHUB_WORKSPACE/${{ inputs.app_name }}:/openedx/${{ inputs.app_name }}"
+        tutor mounts add "cms:$GITHUB_WORKSPACE/${{ inputs.app_name }}:/openedx/${{ inputs.app_name }}"
+      shell: bash
+
+    # Configure inline plugins BEFORE starting Tutor (so image/config overrides apply to init/migrate)
+    - name: Copy inline Tutor plugins to the plugins directory
+      if: ${{ inputs.inline_tutor_plugins_folder }}
+      run: |
+        source .tutor_venv/bin/activate
+        cp -r "${{ inputs.app_name }}/${{ inputs.inline_tutor_plugins_folder }}"/* plugins/
+      shell: bash
+
+    - name: Enable inline Tutor plugins
+      if: ${{ inputs.inline_tutor_plugins_folder }}
+      run: |
+        source .tutor_venv/bin/activate
+
+        for plugin_file in plugins/*; do
+          plugin_name=$(basename "$plugin_file" | cut -f1 -d '.')
+          tutor plugins enable "$plugin_name"
+        done
+      shell: bash
+
+    # Start Tutor ONCE with mounts+plugins already applied
     - name: Launch Tutor
       run: |
         source .tutor_venv/bin/activate
@@ -119,45 +148,12 @@ runs:
         tutor local restart
       shell: bash
 
-    - name: Add mount for Open edX plugin
-      run: |
-        source .tutor_venv/bin/activate
-
-        tutor mounts add "lms:$GITHUB_WORKSPACE/${{ inputs.app_name }}:/openedx/${{ inputs.app_name }}"
-        tutor mounts add "cms:$GITHUB_WORKSPACE/${{ inputs.app_name }}:/openedx/${{ inputs.app_name }}"
-      shell: bash
-
-    - name: Copy inline Tutor plugins to the plugins directory
-      if: ${{ inputs.inline_tutor_plugins_folder }}
-      run: |
-        source .tutor_venv/bin/activate
-
-        cp -r "${{ inputs.app_name }}/${{ inputs.inline_tutor_plugins_folder }}"/* plugins/
-      shell: bash
-
-    - name: Enable inline Tutor plugins
-      run: |
-        source .tutor_venv/bin/activate
-
-        for plugin_file in plugins/*; do
-          plugin_name=$(basename "$plugin_file" | cut -f1 -d '.')
-          tutor plugins enable "$plugin_name"
-        done
-      shell: bash
-
-    - name: Recreate containers to apply mounts and plugins
-      run: |
-        source .tutor_venv/bin/activate
-
-        tutor local start -d lms cms
-      shell: bash
-
     - name: Install Open edX plugin as an editable package
       run: |
         source .tutor_venv/bin/activate
 
-        tutor local exec lms pip install -e /openedx/${{ inputs.app_name }}/
-        tutor local exec cms pip install -e /openedx/${{ inputs.app_name }}/
+        tutor local exec lms bash -lc "PIP_DISABLE_PIP_VERSION_CHECK=1 pip install --no-cache-dir -e /openedx/${{ inputs.app_name }}/"
+        tutor local exec cms bash -lc "PIP_DISABLE_PIP_VERSION_CHECK=1 pip install --no-cache-dir -e /openedx/${{ inputs.app_name }}/"
       shell: bash
 
     - name: Install extra requirements
@@ -165,8 +161,8 @@ runs:
       run: |
         source .tutor_venv/bin/activate
 
-        tutor local exec lms pip install ${{ inputs.openedx_extra_pip_requirements }}
-        tutor local exec cms pip install ${{ inputs.openedx_extra_pip_requirements }}
+        tutor local exec lms bash -lc "PIP_DISABLE_PIP_VERSION_CHECK=1 pip install --no-cache-dir ${{ inputs.openedx_extra_pip_requirements }}"
+        tutor local exec cms bash -lc "PIP_DISABLE_PIP_VERSION_CHECK=1 pip install --no-cache-dir ${{ inputs.openedx_extra_pip_requirements }}"
       shell: bash
 
     - name: Run migrations and restart services
@@ -181,7 +177,6 @@ runs:
     - name: Import Demo course
       run: |
         source .tutor_venv/bin/activate
-
         tutor local do importdemocourse
       shell: bash
 
@@ -190,8 +185,8 @@ runs:
       run: |
         source .tutor_venv/bin/activate
 
-        tutor local exec lms bash -c "pip install pytest pytest-django"
-        tutor local exec lms bash -c "pytest -s --ds=lms.envs.tutor.test /openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }}"
+        tutor local exec lms bash -lc "PIP_DISABLE_PIP_VERSION_CHECK=1 pip install --no-cache-dir pytest pytest-django"
+        tutor local exec lms bash -lc "pytest -s --ds=lms.envs.tutor.test /openedx/${{ inputs.app_name }}/${{ inputs.openedx_imports_test_file_path }}"
       shell: bash
 
     - name: Load initial data for the tests
