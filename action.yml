@@ -145,15 +145,14 @@ runs:
         rm -rf $(tutor config printroot)/data
         tutor local start -d
         tutor local do init
-        tutor local restart
       shell: bash
 
     - name: Install Open edX plugin as an editable package
       run: |
         source .tutor_venv/bin/activate
 
-        tutor local exec lms bash -lc "PIP_DISABLE_PIP_VERSION_CHECK=1 pip install --no-cache-dir -e /openedx/${{ inputs.app_name }}/"
-        tutor local exec cms bash -lc "PIP_DISABLE_PIP_VERSION_CHECK=1 pip install --no-cache-dir -e /openedx/${{ inputs.app_name }}/"
+        tutor local exec lms bash -lc "PIP_DISABLE_PIP_VERSION_CHECK=1 pip install --no-cache-dir --compile -e /openedx/${{ inputs.app_name }}/"
+        tutor local exec cms bash -lc "PIP_DISABLE_PIP_VERSION_CHECK=1 pip install --no-cache-dir --compile -e /openedx/${{ inputs.app_name }}/"
       shell: bash
 
     - name: Install extra requirements
@@ -161,8 +160,8 @@ runs:
       run: |
         source .tutor_venv/bin/activate
 
-        tutor local exec lms bash -lc "PIP_DISABLE_PIP_VERSION_CHECK=1 pip install --no-cache-dir ${{ inputs.openedx_extra_pip_requirements }}"
-        tutor local exec cms bash -lc "PIP_DISABLE_PIP_VERSION_CHECK=1 pip install --no-cache-dir ${{ inputs.openedx_extra_pip_requirements }}"
+        tutor local exec lms bash -lc "PIP_DISABLE_PIP_VERSION_CHECK=1 pip install --no-cache-dir --compile ${{ inputs.openedx_extra_pip_requirements }}"
+        tutor local exec cms bash -lc "PIP_DISABLE_PIP_VERSION_CHECK=1 pip install --no-cache-dir --compile ${{ inputs.openedx_extra_pip_requirements }}"
       shell: bash
 
     - name: Run migrations and restart services
