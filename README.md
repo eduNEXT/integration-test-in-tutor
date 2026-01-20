@@ -68,6 +68,11 @@ The list of Tutor Index plugins to install as a space-separated string. Only plu
 The path to the folder containing the inline Tutor plugins to install. This path is relative to your plugin directory. 
 * *Example*: `"plugins"`
 
+### `enable_plugins_before_init`
+
+**Optional**  
+If `true`, enables inline plugins before initializing Tutor. This is heavier on resources but required when a plugin must patch Tutor early in the startup sequence (e.g., to adjust settings before services are built). Default: `false`.
+
 ### `tutor_extra_commands_path`
 
 **Optional**
